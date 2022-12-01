@@ -1,7 +1,8 @@
 # DSFImageTools
 
-**DSFImageSource**: A wrapper around CGImageSource to provide conveniences for dealing with (potentially) multi-image images
-**WCGImage**: A CGImage convenience library ('Wrapped' CGImage) providing ability to modify/draw on an image
+* **DSFImageSource**: A wrapper around CGImageSource to provide conveniences for dealing with (potentially) multi-image images
+
+* **WCGImage**: A CGImage convenience library ('Wrapped' CGImage) providing ability to modify/draw on an image
 
 <p align="center">
     <img src="https://img.shields.io/github/v/tag/dagronf/DSFImageTools" />
