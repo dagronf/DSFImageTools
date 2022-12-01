@@ -1,9 +1,5 @@
 # DSFImageTools
 
-* **DSFImageSource**: A wrapper around CGImageSource to provide conveniences for dealing with (potentially) multi-image images
-
-* **WCGImage**: A CGImage convenience library ('Wrapped' CGImage) providing ability to modify/draw on an image
-
 <p align="center">
     <img src="https://img.shields.io/github/v/tag/dagronf/DSFImageTools" />
     <img src="https://img.shields.io/badge/License-MIT-lightgrey" />
@@ -23,21 +19,43 @@
     <img src="https://img.shields.io/badge/SwiftUI-2.0+-9cf" />
 </p>
 
-## Why DSFImageSource?
+## DSFImageSource
+
+A wrapper around CGImageSource to provide conveniences for dealing with multi-image images, location and gps and more.
+
+### Why DSFImageSource?
 
 * Provides lower-level information access to an image. For example, GPS data cannot be loaded from an `NSImage`.
 * Support for images with multiple frames (like gifs, multipage tiff files etc.)
-* Create a image file with multiple frames
+* Create a image file with multiple frames.
 
 [Information about DSFImageSource](./README+DSFImageSource.md)
 
-## Why WCGImage?
+## WCGImage
+
+A CGImage convenience library ('Wrapped' CGImage) providing ability to modify/draw on an image
+
+### Why WCGImage?
 
 There has been quite a few times where I've had to do some form of image manipulation. While it can be relatively straight forward, now we have UIImage, NSImage and CGImage (let alone SwiftUI's Image type) to deal with.
 
-I very often find myself falling down into `CGImage` to provide cross-platform support for image manipulations, as all of the platform-specific classes have easy methods for converting to/from.
+I very often find myself falling down into `CGImage` to provide cross-platform support for image manipulations, as all of the platform-specific classes have easy methods for converting to/from CGImage.
 
 I've collated a number of these `CGImage` routines in this simple library.
+
+* loading from file/data
+* flipping
+* scaling (aspect fill, aspect fit, axes independent)
+* rotating
+* image orientation
+* cropping
+* tinting
+* adjusting hsb
+* masking to an image
+* drawing on an image
+* converting to grayscale
+* converting to cmyk
+* exporting to png/jpg/tiff
 
 If you're performing a lot of these functions one after the other it is definitely not as performant as creating all the functions in a single context, BUT, for my needs this library is simple and easy way to avoid re-writing the same code over and over again. Also means bug fixes happen in a single place and fix across the board.
 
