@@ -37,6 +37,7 @@ public enum DSFImageToolsErrorType: Error {
 	case unableToMask
 	case invalidColorspace
 	case invalidParameters
+	case invalidHexColor
 }
 
 /// The type of scaling to apply to an image

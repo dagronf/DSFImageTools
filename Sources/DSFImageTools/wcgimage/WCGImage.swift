@@ -114,7 +114,12 @@ public extension WCGImage {
 		guard let copiedImage = self._owned?.copy() else { throw DSFImageToolsErrorType.invalidImage }
 		return copiedImage
 	}
-	
+
+	/// Return a copy of the underlying CGImage
+	@inlinable func copy() throws -> WCGImage {
+		try WCGImage(image: self)
+	}
+
 	/// Call the block passing in the underlying image. Try not to use this.
 	@inlinable func unsafelyUnwrapped<ReturnType>(_ block: (CGImage) -> ReturnType) throws -> ReturnType {
 		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
@@ -214,6 +219,23 @@ public extension WCGImage {
 		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
 		return try WCGImage(image: try WCGImageStatic.imageByClippingToPath(image, clippingPath: path))
 	}
+
+	/// Returns a new image by applying the result of the draw block into a clipping path
+	/// - Parameters:
+	///   - clipPath: The path within this image to clip to
+	///   - drawBlock: The draw block which returns a WCGImage to clip onto this image
+	/// - Returns: A new image
+	@inlinable func applying(clipPath: CGPath, _ drawBlock: (WCGImage) throws -> WCGImage) throws -> WCGImage {
+		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
+		do {
+			let content = try drawBlock(WCGImage(size: try self.size()))
+			let clippedContent = try WCGImageStatic.imageByClippingToPath(content.release(), clippingPath: clipPath)
+			return try WCGImage(image: WCGImageStatic.imageByDrawingImageOnImage(image, applyingImage: clippedContent))
+		}
+		catch {
+			throw error
+		}
+	}
 	
 	/// Return a tinted version of the image
 	/// - Parameters:
@@ -232,6 +254,38 @@ public extension WCGImage {
 	@inlinable func grayscale(keepingAlpha: Bool = true) throws -> WCGImage {
 		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
 		return try WCGImage(image: try WCGImageStatic.imageWithGrayscale(image, keepingAlpha: keepingAlpha))
+	}
+
+	/// Return a new image by applying transparency to this image
+	/// - Parameter alpha: The alpha value to apply (0 ... 1)
+	/// - Returns: A new image
+	@inlinable func alpha(_ alpha: CGFloat) throws -> WCGImage {
+		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
+		return try WCGImage(
+			image: WCGImageStatic.imageByApplyingAlpha(image, alpha: alpha)
+		)
+	}
+
+	/// Return a new image by drawing an image onto this image
+	/// - Parameters:
+	///   - appliedImage: The image to draw onto this image
+	///   - rect: The rectangle in which to draw the image
+	///   - clippingPath: The path to clip the applied image to
+	/// - Returns: A new image
+	@inlinable func applying(
+		_ appliedImage: CGImage,
+		in rect: CGRect = .zero,
+		clippingPath: CGPath? = nil
+	) throws -> WCGImage {
+		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
+		return try WCGImage(
+			image: try WCGImageStatic.imageByDrawingImageOnImage(
+				image,
+				applyingImage: appliedImage,
+				in: rect,
+				clippingPath: clippingPath
+			)
+		)
 	}
 	
 	/// Returns a new image by masking. Transparent areas of the mask image are not drawn
@@ -255,21 +309,69 @@ public extension WCGImage {
 		guard let appliedImage = appliedImage._owned else { throw DSFImageToolsErrorType.invalidImage }
 		return try self.applying(appliedImage, in: rect)
 	}
-	
-	/// Return a new image by drawing an image onto this image
+
+	/// Return a new image by fill the path with the specified color on top of this image
 	/// - Parameters:
-	///   - appliedImage: The image to draw onto this image
-	///   - rect: The rectangle in which to draw the image
+	///   - color: The fill color
+	///   - path: The path on this image to fill
 	/// - Returns: A new image
-	@inlinable func applying(_ appliedImage: CGImage, in rect: CGRect = .zero) throws -> WCGImage {
-		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
-		return try WCGImage(
-			image: try WCGImageStatic.imageByDrawingImageOnImage(
-				image,
-				applyingImage: appliedImage,
-				in: rect
-			)
-		)
+	@inlinable func fill(_ color: CGColor, path: CGPath) throws -> WCGImage {
+		return try self.drawing { ctx, size in
+			ctx.setFillColor(color)
+			ctx.addPath(path)
+			ctx.fillPath()
+		}
+	}
+
+	/// Return a new image by stroking the path with the specified color on top of this image
+	/// - Parameters:
+	///   - color: The stroke color
+	///   - path: The path on this image to stroke
+	/// - Returns: A new image
+	@inlinable func stroke(_ color: CGColor, lineWidth: CGFloat = 1.0, path: CGPath) throws -> WCGImage {
+		return try self.drawing { ctx, size in
+			ctx.setStrokeColor(color)
+			ctx.setLineWidth(lineWidth)
+			ctx.addPath(path)
+			ctx.fillPath()
+		}
+	}
+
+	/// Return a new image by filling then stroking the specified path on top of this image
+	/// - Parameters:
+	///   - stroke: The stroke color
+	///   - lineWidth: The width of the stroke
+	///   - fill: The fill color
+	///   - path: The path on this image to stroke
+	/// - Returns: A new image
+	func fillStroke(stroke: CGColor, lineWidth: CGFloat = 1, fill: CGColor, path: CGPath) throws -> WCGImage {
+		return try self.drawing { ctx, size in
+			ctx.setFillColor(fill)
+			ctx.addPath(path)
+			ctx.fillPath()
+
+			ctx.setStrokeColor(stroke)
+			ctx.setLineWidth(lineWidth)
+			ctx.addPath(path)
+			ctx.strokePath()
+		}
+	}
+
+	/// Return a new image by filling then stroking the specified path on top of this image
+	/// - Parameters:
+	///   - stroke: The stroke color as a hex string
+	///   - lineWidth: The width of the stroke
+	///   - fill: The fill color as a hex string
+	///   - path: The path on this image to stroke
+	/// - Returns: A new image
+	@inlinable func fillStroke(stroke: String, lineWidth: CGFloat = 1, fill: String, path: CGPath) throws -> WCGImage {
+		guard
+			let s = WCGColor.hex(stroke),
+			let f = WCGColor.hex(fill)
+		else {
+			throw DSFImageToolsErrorType.invalidHexColor
+		}
+		return try fillStroke(stroke: s, lineWidth: 1, fill: f, path: path)
 	}
 }
 

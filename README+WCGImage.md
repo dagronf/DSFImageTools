@@ -109,7 +109,7 @@ let modifiedImage = try originalImage.drawing { ctx, size in
 * Flipping
 * Clipping an image to a path
 * Masking an image with another image
-* Tinting and grayscale
+* Tinting, grayscale, transparency
 * Appling another image on top of an image.
 * Adjusting colors (eg. contrast, saturation, brightness)
 

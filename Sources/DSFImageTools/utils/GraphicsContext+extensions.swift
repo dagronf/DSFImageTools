@@ -1,5 +1,5 @@
 //
-//  CGContext+extensions.swift
+//  GraphicsContext+extensions.swift
 //
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
@@ -26,7 +26,7 @@
 import Foundation
 import CoreGraphics
 
-// MARK: - CGContext GState block
+// MARK: - CoreGraphics
 
 extension CGContext {
 	/// Execute the supplied block within a `saveGState() / restoreGState()` pair, providing a context
@@ -37,15 +37,37 @@ extension CGContext {
 	///
 	/// Example usage:
 	/// ```
-	///    context.usingGState { (ctx) in
+	///    context.savingGState { ctx in
 	///       ctx.addPath(unsetBackground)
 	///       ctx.setFillColor(bgc1.cgColor)
 	///       ctx.fillPath(using: .evenOdd)
 	///    }
 	/// ```
-	@inlinable func usingGState<ReturnType>(_ stateBlock: (_ context: CGContext) throws -> ReturnType) rethrows -> ReturnType {
+	@inlinable public func savingGState<ReturnType>(_ stateBlock: (_ context: CGContext) throws -> ReturnType) rethrows -> ReturnType {
 		self.saveGState()
 		defer { self.restoreGState() }
 		return try stateBlock(self)
 	}
 }
+
+// MARK: - AppKit
+
+#if os(macOS)
+
+import AppKit
+
+extension NSGraphicsContext {
+	/// A convenience method for saving and restoring the current graphics context.
+
+	/// Execute the supplied block within a `NSGraphicsContext.saveGraphicsState()` / `NSGraphicsContext.restoreGraphicsState()`
+	/// pair, providing a context to draw in during the execution of the block
+	///
+	/// - Parameter drawBlock: The block to execute within the new graphics state
+	@objc @inlinable public static func savingGState(_ drawBlock: () -> Void) {
+		NSGraphicsContext.saveGraphicsState()
+		defer { NSGraphicsContext.restoreGraphicsState() }
+		drawBlock()
+	}
+}
+
+#endif

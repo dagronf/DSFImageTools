@@ -55,17 +55,6 @@ extension NSImage {
 	}
 }
 
-// MARK: - NSGraphicsContext conveniences
-
-extension NSGraphicsContext {
-	/// A convenience method for saving and restoring the current graphics context.
-	@objc @inlinable public static func savingGState(_ drawBlock: () -> Void) {
-		NSGraphicsContext.saveGraphicsState()
-		defer { NSGraphicsContext.restoreGraphicsState() }
-		drawBlock()
-	}
-}
-
 extension NSImage {
 	/// Create an image by drawing into it via a block using `NSGraphicsContext`
 	/// - Parameters:

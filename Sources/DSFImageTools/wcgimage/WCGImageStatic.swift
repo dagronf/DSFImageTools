@@ -228,13 +228,13 @@ public extension WCGImageStatic {
 		return try WCGImageStatic.Create(size: rect.size) { ctx, size in
 
 			// Draw the image into the new image
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				// draw the image into the new image
 				context.draw(image, in: CGRect(origin: .zero, size: size))
 			}
 
 			// Call the drawing block
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				ctx.setStrokeColor(color)
 				ctx.setLineWidth(lineWidth)
 				ctx.stroke(rect.insetBy(dx: lineWidth / 2, dy: lineWidth / 2))
@@ -252,13 +252,13 @@ public extension WCGImageStatic {
 		try WCGImageStatic.Create(size: WCGImageStatic.size(image)) { ctx, size in
 
 			// Draw the image into the new image
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				// draw the image into the new image
 				context.draw(image, in: CGRect(origin: .zero, size: size))
 			}
 
 			// Call the drawing block
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				drawBlock(context, size)
 			}
 		}
@@ -280,13 +280,13 @@ public extension WCGImageStatic {
 		let size = WCGImageStatic.size(image)
 		return try WCGImageStatic.Create(size: size) { ctx, size in
 			// Draw the base image into the new context
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				// draw the image into the new image
 				context.draw(image, in: CGRect(origin: .zero, size: size))
 			}
 
 			// Draw the image into the specified rect
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				// If there's a clipping path, clip the context to it
 				if let c = clippingPath {
 					// Clip to the mask path.
@@ -298,6 +298,29 @@ public extension WCGImageStatic {
 				let r = (rect == .zero) ? CGRect(origin: .zero, size: size) : rect
 				context.draw(apply, in: r)
 			}
+		}
+	}
+
+	/// Create a new image by applying transparency to an image
+	/// - Parameters:
+	///   - image: The original image
+	///   - alpha: The alpha level for the new image (0 ... 1)
+	/// - Returns: A new image
+	@objc static func imageByApplyingAlpha(
+		_ image: CGImage,
+		alpha: CGFloat
+	) throws -> CGImage {
+		guard
+			(0.0 ... 1.0).contains(alpha)
+		else {
+			Swift.print("Invalid alpha level \(alpha) - must be 0 -> 1")
+			throw DSFImageToolsErrorType.invalidParameters
+		}
+
+		let size = WCGImageStatic.size(image)
+		return try WCGImageStatic.Create(size: size) { ctx, size in
+			ctx.setAlpha(alpha)
+			ctx.draw(image, in: CGRect(origin: .zero, size: size))
 		}
 	}
 }
@@ -313,7 +336,7 @@ public extension WCGImageStatic {
 		flipType: WCGImageFlipType = .horizontally
 	) throws -> CGImage {
 		try WCGImageStatic.Create(size: WCGImageStatic.size(image)) { ctx, size in
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				// draw the image into the new image
 				switch flipType {
 				case .horizontally:
@@ -675,7 +698,7 @@ public extension WCGImageStatic {
 		let size = WCGImageStatic.size(image)
 		return try WCGImageStatic.Create(size: size) { ctx, size in
 			// Draw the image into the specified rect
-			ctx.usingGState { context in
+			ctx.savingGState { context in
 				context.addPath(clippingPath)
 				context.clip()
 
