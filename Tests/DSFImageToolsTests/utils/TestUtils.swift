@@ -24,3 +24,20 @@ class TestOutputContainer {
 		_container.appendingPathComponent(name)
 	}
 }
+
+#if os(macOS)
+public func getMacModel() -> String? {
+	let service = IOServiceGetMatchingService(kIOMasterPortDefault,
+															IOServiceMatching("IOPlatformExpertDevice"))
+	var modelIdentifier: String?
+	
+	if let modelData = IORegistryEntryCreateCFProperty(service, "model" as CFString, kCFAllocatorDefault, 0).takeRetainedValue() as? Data {
+		if let modelIdentifierCString = String(data: modelData, encoding: .utf8)?.cString(using: .utf8) {
+			modelIdentifier = String(cString: modelIdentifierCString)
+		}
+	}
+	
+	IOObjectRelease(service)
+	return modelIdentifier
+}
+#endif

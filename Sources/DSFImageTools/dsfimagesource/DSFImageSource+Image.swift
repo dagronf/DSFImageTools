@@ -1,5 +1,6 @@
 //
 //  DSFImageSource+Image.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -199,7 +200,7 @@ public extension DSFImageSource {
 			type: DSFImageSourceType,
 			removeGPSData: Bool = false,
 			compression: CGFloat = .infinity,
-			options: [CFString: Any]? = nil
+			options: [String: Any]? = nil
 		) -> Data? {
 			return self.imageData(
 				utiType: type.rawValue,
@@ -220,7 +221,7 @@ public extension DSFImageSource {
 			utiType: String,
 			removeGPSData: Bool = false,
 			compression: CGFloat = .infinity,
-			options: [CFString: Any]? = nil
+			options: [String: Any]? = nil
 		) -> Data? {
 			return self.image?.imageData(
 				utiType: utiType,
@@ -272,7 +273,7 @@ public extension DSFImageSource {
 		/// - Returns: The generated thumbnail
 		@objc public func thumbnail(
 			maxThumbnailSize: Int = 300,
-			otherOptions: [CFString: Any]? = nil
+			otherOptions: [String: Any]? = nil
 		) -> CGImage? {
 			guard let isource = source?.imageSource else { return nil }
 			var opts: [CFString: Any] = [
@@ -281,14 +282,14 @@ public extension DSFImageSource {
 			]
 
 			// Add in the user's options
-			otherOptions?.forEach { opts[$0.0] = $0.1 }
+			otherOptions?.forEach { opts[$0.0 as CFString] = $0.1 }
 			return CGImageSourceCreateThumbnailAtIndex(isource, self.index, opts as CFDictionary)
 		}
 
 		#if os(macOS)
 		@inlinable @objc public func thumbnailImage(
 			maxThumbnailSize: Int = 300,
-			otherOptions: [CFString: Any]? = nil
+			otherOptions: [String: Any]? = nil
 		) -> NSImage? {
 			if let t = self.thumbnail(maxThumbnailSize: maxThumbnailSize, otherOptions: otherOptions) {
 				return NSImage(cgImage: t, size: .zero)
@@ -298,7 +299,7 @@ public extension DSFImageSource {
 		#else
 		@inlinable @objc public func thumbnailImage(
 			maxThumbnailSize: Int = 300,
-			otherOptions: [CFString: Any]? = nil
+			otherOptions: [String: Any]? = nil
 		) -> UIImage? {
 			if let t = self.thumbnail(maxThumbnailSize: maxThumbnailSize, otherOptions: otherOptions) {
 				return UIImage(cgImage: t)

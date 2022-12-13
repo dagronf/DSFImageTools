@@ -1,5 +1,6 @@
 //
 //  DSFImageSource+Builder.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -22,6 +23,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+import CoreGraphics
 import Foundation
 import ImageIO
 
@@ -55,7 +57,7 @@ public extension DSFImageSource {
 		@objc public var count: Int { self.images.count }
 		
 		/// Convenience for creating an image source from a collection of images. The compression level applies to all images in the collection
-		@objc public init(images: [CGImage], compressionLevel: CGFloat = 1.0) {
+		public init(images: [CGImage], compressionLevel: CGFloat = 1.0) {
 			self.images = images.compactMap { ($0, [kCGImageDestinationLossyCompressionQuality as String: compressionLevel]) }
 			super.init()
 		}

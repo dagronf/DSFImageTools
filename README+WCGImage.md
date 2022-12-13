@@ -14,20 +14,20 @@ If you're performing a lot of these functions one after the other it is definite
 
 ## Static routines (Swift/Objective-C)
 
-`WCGImage` provides a set of static functions for loading, manipulating and saving images.
+`WCGImageStatic` provides a set of static functions for loading, manipulating and saving images.
 Each function takes a `CGImage` and returns a `CGImage`.
 
 ```swift
 let origImage: CGImage = ...
 
 // Saturate the original image
-let saturatedImage = try WCGImage.imageByAdjustingColorsInImage(origImage, saturation: 1.6)
+let saturatedImage = try WCGImageStatic.imageByAdjustingColorsInImage(origImage, saturation: 1.6)
 
 // Scale the saturated image
-let scaled = try WCGImage.imageByScalingImage(saturatedImage, scalingType: .aspectFit, to: CGSize(width: 100, height: 100))
+let scaled = try WCGImageStatic.imageByScalingImage(saturatedImage, scalingType: .aspectFit, to: CGSize(width: 100, height: 100))
 
 // Draw a rounded rectangle on top of the original image
-let drawn = try WCGImage.imageByDrawingOnImage(origImage) { ctx, size in
+let drawn = try WCGImageStatic.imageByDrawingOnImage(origImage) { ctx, size in
    ctx.setFillColor(CGColor(srgbRed: 0, green: 0, blue: 1, alpha: 1))
    ctx.addPath(
       CGPath(
@@ -38,7 +38,26 @@ let drawn = try WCGImage.imageByDrawingOnImage(origImage) { ctx, size in
    )
    ctx.fillPath()
 }
+```
 
+### Objective-C
+
+```objc
+CGImageRef image = [WCGImageStatic CreateWithSize:CGSizeMake(80, 80)
+                                  backgroundColor:NULL
+                                            error:NULL :^(CGContextRef _Nonnull ctx, CGSize sz) {
+   const CGFloat args[] = { 0.0, 0.0, 0.0, 1.0 };
+   const CGColorRef cg1 = CGColorCreate(CGColorSpaceCreateDeviceRGB(), args);
+   CGContextSetFillColorWithColor(ctx, cg1);
+   CGRect r = CGRectMake(10, 10, 50, 50);
+   CGContextFillRect(ctx, r);
+
+   const CGFloat args2[] = { 1.0, 1.0, 1.0, 1.0 };
+   const CGColorRef cg2 = CGColorCreate(CGColorSpaceCreateDeviceRGB(), args2);
+   CGContextSetFillColorWithColor(ctx, cg2);
+   CGRect r2 = CGRectMake(40, 40, 30, 30);
+   CGContextFillRect(ctx, r2);
+}];
 ```
 
 ## `WCGImage` class (Swift only)

@@ -1,5 +1,6 @@
 //
 //  CGImage+extensions.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -23,8 +24,12 @@
 //  SOFTWARE.
 
 import CoreGraphics
-import CoreImage
+import ImageIO
 import Foundation
+
+#if canImport(CoreImage)
+import CoreImage
+#endif
 
 private let ___ValidCompressionRange: ClosedRange<CGFloat> = 0 ... 1
 
@@ -47,7 +52,7 @@ extension CGImage {
 		type: DSFImageSourceType,
 		removeGPSData: Bool = false,
 		compression: CGFloat = .infinity,
-		options: [CFString: Any]? = nil
+		options: [String: Any]? = nil
 	) -> Data? {
 		return self.imageData(
 			utiType: type.rawValue,
@@ -68,7 +73,7 @@ extension CGImage {
 		utiType: String,
 		removeGPSData: Bool = false,
 		compression: CGFloat = .infinity,
-		options: [CFString: Any]? = nil
+		options: [String: Any]? = nil
 	) -> Data? {
 		// Check that if compression is provided that it is within a valid range
 		if compression.isFinite, ___ValidCompressionRange.contains(compression) == false {
@@ -90,7 +95,7 @@ extension CGImage {
 		}
 		
 		// Add in the user's customizations
-		options?.forEach { props[$0.0] = $0.1 }
+		options?.forEach { props[$0.0 as CFString] = $0.1 }
 		
 		CGImageDestinationAddImage(destination, self, props as CFDictionary)
 		

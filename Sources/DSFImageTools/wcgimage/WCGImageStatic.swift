@@ -1,5 +1,6 @@
 //
-//  WCGImage+static.swift
+//  WCGImageStatic.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -22,9 +23,15 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+// Static image implementations
+
 import CoreGraphics
-import CoreImage
+import ImageIO
 import Foundation
+
+#if canImport(CoreImage)
+import CoreImage
+#endif
 
 #if !os(macOS)
 @usableFromInline internal let kUTTypeJPEG = "public.jpeg" as CFString
@@ -34,7 +41,12 @@ import Foundation
 
 // MARK: [General]
 
-public extension WCGImage {
+@objc public class WCGImageStatic: NSObject {
+	// Cannot create an instance of this class
+	private override init() {}
+}
+
+public extension WCGImageStatic {
 	/// The pixel size for the image
 	@objc @inlinable @inline(__always) static func size(_ image: CGImage) -> CGSize {
 		return CGSize(width: image.width, height: image.height)
@@ -48,7 +60,7 @@ public extension WCGImage {
 
 // MARK: [Creation]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Create a CGImage with an sRGB colorspace
 	/// - Parameters:
 	///   - size: The size of the resulting image
@@ -74,7 +86,7 @@ public extension WCGImage {
 				bitmapInfo: bitmapInfo.rawValue
 			)
 		else {
-			throw ErrorType.invalidContext
+			throw DSFImageToolsErrorType.invalidContext
 		}
 
 		// Drawing defaults
@@ -98,7 +110,7 @@ public extension WCGImage {
 		}
 
 		guard let result = ctx.makeImage() else {
-			throw ErrorType.unableToCreateImageFromContext
+			throw DSFImageToolsErrorType.unableToCreateImageFromContext
 		}
 		return result
 	}
@@ -106,7 +118,7 @@ public extension WCGImage {
 
 // MARK: [Exporting]
 
-internal extension WCGImage {
+internal extension WCGImageStatic {
 	/// Returns a data representation of the image
 	/// - Parameters:
 	///   - image: The image
@@ -125,7 +137,7 @@ internal extension WCGImage {
 		{
 			var options: [CFString: Any] = [:]
 			if let compression = compression {
-				guard (0.0 ... 1.0).contains(compression) else { throw ErrorType.invalidCompression }
+				guard (0.0 ... 1.0).contains(compression) else { throw DSFImageToolsErrorType.invalidCompression }
 				options[kCGImageDestinationLossyCompressionQuality] = compression
 			}
 			if excludeGPSData == true {
@@ -136,11 +148,11 @@ internal extension WCGImage {
 			return mutableData as Data
 		}
 
-		throw ErrorType.cannotCreateDestination
+		throw DSFImageToolsErrorType.cannotCreateDestination
 	}
 }
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Generate a JPEG representation for a CGImage
 	/// - Parameters:
 	///   - image: The image
@@ -189,21 +201,21 @@ public extension WCGImage {
 
 // MARK: [Cropping]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Create an image by cropping an image to a rect
 	/// - Parameters:
 	///   - image: The image to crop
 	///   - rect: The region of the image to crop out
 	/// - Returns: The cropped image, or nil if an error occurs
 	@objc @inlinable static func imageByCroppingImage(_ image: CGImage, to rect: CGRect) throws -> CGImage {
-		guard let image = image.cropping(to: rect) else { throw ErrorType.cannotCreateImage }
+		guard let image = image.cropping(to: rect) else { throw DSFImageToolsErrorType.cannotCreateImage }
 		return image
 	}
 }
 
 // MARK: [Drawing]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Create a new image by applying a drawing a border around the outside of the image
 	/// - Parameter drawBlock: The drawing block to perform
 	/// - Returns: A new image
@@ -212,8 +224,8 @@ public extension WCGImage {
 		color: CGColor,
 		lineWidth: CGFloat = 1
 	) throws -> CGImage {
-		let rect = WCGImage.rect(image)
-		return try WCGImage.Create(size: rect.size) { ctx, size in
+		let rect = WCGImageStatic.rect(image)
+		return try WCGImageStatic.Create(size: rect.size) { ctx, size in
 
 			// Draw the image into the new image
 			ctx.usingGState { context in
@@ -237,7 +249,7 @@ public extension WCGImage {
 		_ image: CGImage,
 		_ drawBlock: @escaping (CGContext, CGSize) -> Void
 	) throws -> CGImage {
-		try WCGImage.Create(size: WCGImage.size(image)) { ctx, size in
+		try WCGImageStatic.Create(size: WCGImageStatic.size(image)) { ctx, size in
 
 			// Draw the image into the new image
 			ctx.usingGState { context in
@@ -265,8 +277,8 @@ public extension WCGImage {
 		in rect: CGRect = .zero,
 		clippingPath: CGPath? = nil
 	) throws -> CGImage {
-		let size = WCGImage.size(image)
-		return try WCGImage.Create(size: size) { ctx, size in
+		let size = WCGImageStatic.size(image)
+		return try WCGImageStatic.Create(size: size) { ctx, size in
 			// Draw the base image into the new context
 			ctx.usingGState { context in
 				// draw the image into the new image
@@ -292,12 +304,15 @@ public extension WCGImage {
 
 // MARK: [Rotating]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Create a new image by flipping this image
 	/// - Parameter flipType: The type of flipping to apply
 	/// - Returns: A new image with the original image flipped
-	@objc static func imageByFlippingImage(_ image: CGImage, flipType: FlipType = .horizontally) throws -> CGImage {
-		try WCGImage.Create(size: WCGImage.size(image)) { ctx, size in
+	@objc static func imageByFlippingImage(
+		_ image: CGImage,
+		flipType: WCGImageFlipType = .horizontally
+	) throws -> CGImage {
+		try WCGImageStatic.Create(size: WCGImageStatic.size(image)) { ctx, size in
 			ctx.usingGState { context in
 				// draw the image into the new image
 				switch flipType {
@@ -319,7 +334,7 @@ public extension WCGImage {
 
 // MARK: [Flipping]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Create a new image by re-orienting the passed image
 	/// - Parameters:
 	///   - image: The image to reorient
@@ -330,7 +345,7 @@ public extension WCGImage {
 		to orientation: CGImagePropertyOrientation
 	) throws -> CGImage {
 		guard let colorSpace = image.colorSpace else {
-			throw ErrorType.invalidColorspace
+			throw DSFImageToolsErrorType.invalidColorspace
 		}
 
 		let originalWidth = image.width
@@ -403,7 +418,7 @@ public extension WCGImage {
 			bitmapInfo: bitmapInfo.rawValue
 		)
 		else {
-			throw ErrorType.invalidContext
+			throw DSFImageToolsErrorType.invalidContext
 		}
 
 		ctx.translateBy(x: CGFloat(width) / 2.0, y: CGFloat(height) / 2.0)
@@ -423,7 +438,7 @@ public extension WCGImage {
 
 		ctx.draw(image, in: CGRect(x: 0.0, y: 0.0, width: CGFloat(originalWidth), height: CGFloat(originalHeight)))
 
-		guard let image = ctx.makeImage() else { throw ErrorType.cannotCreateImage }
+		guard let image = ctx.makeImage() else { throw DSFImageToolsErrorType.cannotCreateImage }
 		return image
 	}
 
@@ -437,7 +452,7 @@ public extension WCGImage {
 		let origHeight = CGFloat(image.height)
 		let origRect = CGRect(origin: .zero, size: CGSize(width: origWidth, height: origHeight))
 		let rotatedRect = origRect.applying(CGAffineTransform(rotationAngle: radians))
-		return try WCGImage.Create(size: rotatedRect.size) { ctx, size in
+		return try WCGImageStatic.Create(size: rotatedRect.size) { ctx, size in
 			ctx.translateBy(x: rotatedRect.size.width * 0.5, y: rotatedRect.size.height * 0.5)
 			ctx.rotate(by: -radians)
 			ctx.draw(
@@ -455,7 +470,7 @@ public extension WCGImage {
 
 // MARK: [Scaling]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Create an image by scaling the provided image to fit a target size
 	/// - Parameters:
 	///   - image: The image to scale
@@ -464,16 +479,16 @@ public extension WCGImage {
 	/// - Returns: The scaled image, or nil if an error occurred
 	@objc static func imageByScalingImage(
 		_ image: CGImage,
-		scalingType: ScalingType = .axesIndependent,
+		scalingType: WCGImageScalingType = .axesIndependent,
 		to targetSize: CGSize
 	) throws -> CGImage {
 		switch scalingType {
 		case .axesIndependent:
-			return try WCGImage.imageByScalingImage(image, targetSize: targetSize)
+			return try WCGImageStatic.imageByScalingImage(image, targetSize: targetSize)
 		case .aspectFill:
-			return try WCGImage.imageByScalingImageToFill(image, targetSize: targetSize)
+			return try WCGImageStatic.imageByScalingImageToFill(image, targetSize: targetSize)
 		case .aspectFit:
-			return try WCGImage.imageByScalingImageToFit(image, targetSize: targetSize)
+			return try WCGImageStatic.imageByScalingImageToFit(image, targetSize: targetSize)
 		}
 	}
 
@@ -483,7 +498,7 @@ public extension WCGImage {
 	///   - targetSize: The target size for the image
 	/// - Returns: The scaled image, or nil if an error occurred
 	@objc @inlinable static func imageByScalingImage(_ image: CGImage, targetSize: CGSize) throws -> CGImage {
-		try WCGImage.Create(size: targetSize) { ctx, size in
+		try WCGImageStatic.Create(size: targetSize) { ctx, size in
 			ctx.draw(image, in: CGRect(origin: .zero, size: targetSize))
 		}
 	}
@@ -494,7 +509,7 @@ public extension WCGImage {
 	///   - targetSize: The target size for the image
 	/// - Returns: The scaled image, or nil if an error occurred
 	@objc static func imageByScalingImageToFit(_ image: CGImage, targetSize: CGSize) throws -> CGImage {
-		let origSize = WCGImage.size(image)
+		let origSize = WCGImageStatic.size(image)
 		// Keep aspect ratio
 		var destWidth: CGFloat = 0
 		var destHeight: CGFloat = 0
@@ -538,7 +553,7 @@ public extension WCGImage {
 	///   - targetSize: The target size for the image
 	/// - Returns: The scaled image, or nil if an error occurred
 	static func imageByScalingImageToFill(_ image: CGImage, targetSize: CGSize) throws -> CGImage {
-		let origSize = WCGImage.size(image)
+		let origSize = WCGImageStatic.size(image)
 
 		var destWidth: CGFloat = 0
 		var destHeight: CGFloat = 0
@@ -571,7 +586,7 @@ public extension WCGImage {
 
 // MARK: [Coloring]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Returns a new image tinted with a color
 	/// - Parameters:
 	///   - image: The image to tint
@@ -588,7 +603,7 @@ public extension WCGImage {
 
 			// draw black background to preserve color of transparent pixels
 			ctx.setBlendMode(.normal)
-			ctx.setFillColor(WCGImage.Color.black)
+			ctx.setFillColor(WCGColor.black)
 			ctx.fill([rect])
 
 			// Draw the image
@@ -627,7 +642,7 @@ public extension WCGImage {
 			bitmapInfo: keepingAlpha ? CGImageAlphaInfo.premultipliedLast.rawValue : CGImageAlphaInfo.none.rawValue
 		)
 		else {
-			throw ErrorType.invalidContext
+			throw DSFImageToolsErrorType.invalidContext
 		}
 
 		/// Draw the image into the new context
@@ -642,7 +657,7 @@ public extension WCGImage {
 		}
 
 		guard let image = ctx.makeImage() else {
-			throw ErrorType.cannotCreateImage
+			throw DSFImageToolsErrorType.cannotCreateImage
 		}
 		return image
 	}
@@ -650,15 +665,15 @@ public extension WCGImage {
 
 // MARK: [Masking and clipping]
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Create an image by clipping an image against a path
 	/// - Parameters:
 	///   - image: The image to clip
 	///   - clippingPath: The clipping path
 	/// - Returns: The clipped image
 	@objc static func imageByClippingToPath(_ image: CGImage, clippingPath: CGPath) throws -> CGImage {
-		let size = WCGImage.size(image)
-		return try WCGImage.Create(size: size) { ctx, size in
+		let size = WCGImageStatic.size(image)
+		return try WCGImageStatic.Create(size: size) { ctx, size in
 			// Draw the image into the specified rect
 			ctx.usingGState { context in
 				context.addPath(clippingPath)
@@ -676,7 +691,7 @@ public extension WCGImage {
 	///   - maskImage: The mask image
 	/// - Returns: A new image
 	@objc static func imageByMaskingWithImage(_ image: CGImage, maskImage: CGImage) throws -> CGImage {
-		let origSize = WCGImage.size(image)
+		let origSize = WCGImageStatic.size(image)
 
 		guard
 			let mask = CGImage(
@@ -690,10 +705,10 @@ public extension WCGImage {
 				shouldInterpolate: false
 			)
 		else {
-			throw ErrorType.unableToMask
+			throw DSFImageToolsErrorType.unableToMask
 		}
 
-		let imageRefWithAlpha = try WCGImage.Create(size: origSize) { ctx, size in
+		let imageRefWithAlpha = try WCGImageStatic.Create(size: origSize) { ctx, size in
 			// Draw the original image in the bitmap context
 			let r = CGRect(x: 0, y: 0, width: origSize.width, height: origSize.height)
 			ctx.clip(to: r, mask: maskImage)
@@ -701,13 +716,13 @@ public extension WCGImage {
 		}
 
 		guard let result = imageRefWithAlpha.masking(mask) else {
-			throw ErrorType.unableToMask
+			throw DSFImageToolsErrorType.unableToMask
 		}
 		return result
 	}
 }
 
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Returns a new image with a CMYK colorspace
 	/// - Parameter image: The image to convert
 	/// - Returns: The converted image
@@ -723,12 +738,12 @@ public extension WCGImage {
 			bitmapInfo: bitmapInfo.rawValue
 		)
 		else {
-			throw ErrorType.invalidContext
+			throw DSFImageToolsErrorType.invalidContext
 		}
 
 		ctx.draw(image, in: CGRect(origin: .zero, size: Self.size(image)))
 		guard let cgImage = ctx.makeImage() else {
-			throw ErrorType.cannotCreateImage
+			throw DSFImageToolsErrorType.cannotCreateImage
 		}
 		return cgImage
 	}
@@ -750,19 +765,19 @@ public extension WCGImage {
 				bitmapInfo: bitmapInfo.rawValue
 			)
 		else {
-			throw ErrorType.invalidContext
+			throw DSFImageToolsErrorType.invalidContext
 		}
 
 		ctx.draw(image, in: CGRect(origin: .zero, size: Self.size(image)))
 		guard let cgImage = ctx.makeImage() else {
-			throw ErrorType.cannotCreateImage
+			throw DSFImageToolsErrorType.cannotCreateImage
 		}
 		return cgImage
 	}
 }
 
 #if canImport(CoreImage)
-public extension WCGImage {
+public extension WCGImageStatic {
 	/// Adjust the saturation/brightness/contrast values for the image
 	/// - Parameters:
 	///   - image: The input image
@@ -781,7 +796,7 @@ public extension WCGImage {
 			(-1.0 ... 1.0).contains(brightness),
 			(0.25 ... 4.0).contains(contrast)
 		else {
-			throw ErrorType.invalidParameters
+			throw DSFImageToolsErrorType.invalidParameters
 		}
 
 		guard let filter = CIFilter(
@@ -794,7 +809,7 @@ public extension WCGImage {
 			]
 		)
 		else {
-			throw ErrorType.cannotCreateImage
+			throw DSFImageToolsErrorType.cannotCreateImage
 		}
 
 		guard
@@ -802,7 +817,7 @@ public extension WCGImage {
 			let ctx = Optional(CIContext(options: nil)),
 			let cgImage = ctx.createCGImage(output, from: output.extent)
 		else {
-			throw ErrorType.cannotCreateImage
+			throw DSFImageToolsErrorType.cannotCreateImage
 		}
 		return cgImage
 	}

@@ -9,6 +9,24 @@ private func bundleResourceURL(forResource name: String, withExtension ext: Stri
 
 final class DSFImageSourceTests: XCTestCase {
 
+	override class func setUp() {
+		super.setUp()
+
+		let name: String = {
+#if os(macOS)
+			getMacModel()!
+#elseif os(watchOS)
+			"watchOS"
+#elseif os(tvOS)
+			"tvOS"
+#else
+			UIDevice.current.localizedModel
+#endif
+		}()
+
+		markdown.h1("Generated on '\(name)'")
+	}
+
 	override class func tearDown() {
 		super.tearDown()
 
@@ -101,7 +119,7 @@ final class DSFImageSourceTests: XCTestCase {
 		try markdown.image(image222).raw(" | ").br()
 	}
 
-	#if !os(tvOS)
+	#if !os(tvOS) && !os(watchOS)
 	func testThumbnailGeneration() throws {
 
 		let imgURL = bundleResourceURL(forResource: "hulk", withExtension: "gif")
@@ -151,35 +169,36 @@ final class DSFImageSourceTests: XCTestCase {
 
 	func testCompressionLevels() throws {
 
-		markdown.h1("Compression")
+		try markdown.h1("Compression") { markdown in
 
-		let imgURL = bundleResourceURL(forResource: "Portrait_5", withExtension: "jpg")
-		let imageSource = try XCTAssertUnwrap(DSFImageSource(fileURL: imgURL))
-		let image = try XCTAssertUnwrap(imageSource[0])
+			let imgURL = bundleResourceURL(forResource: "Portrait_5", withExtension: "jpg")
+			let imageSource = try XCTAssertUnwrap(DSFImageSource(fileURL: imgURL))
+			let image = try XCTAssertUnwrap(imageSource[0])
 
-		markdown.raw("|  1.0  |  0.6  |  0.3  |  0.0  |\n")
-		markdown.raw("|:-----:|:-----:|:-----:|:-----:|\n")
+			markdown.raw("|  1.0  |  0.6  |  0.3  |  0.0  |\n")
+			markdown.raw("|:-----:|:-----:|:-----:|:-----:|\n")
 
-		markdown.raw("|")
-		let data1 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 1.0))
-		try markdown.image(try WCGImage(data: data1)).raw("<br/>")
-		markdown.raw("\(data1.count) |")
+			markdown.raw("|")
+			let data1 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 1.0))
+			try markdown.image(try WCGImage(data: data1)).raw("<br/>")
+			markdown.raw("\(data1.count) |")
 
-		let data2 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 0.6))
-		try markdown.image(try WCGImage(data: data2)).raw("<br/>")
-		markdown.raw("\(data2.count) |")
-		let data3 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 0.3))
-		try markdown.image(try WCGImage(data: data3)).raw("<br/>")
-		markdown.raw("\(data3.count) |")
-		let data4 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 0.0))
-		try markdown.image(try WCGImage(data: data4)).raw("<br/>")
-		markdown.raw("\(data4.count) |")
+			let data2 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 0.6))
+			try markdown.image(try WCGImage(data: data2)).raw("<br/>")
+			markdown.raw("\(data2.count) |")
+			let data3 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 0.3))
+			try markdown.image(try WCGImage(data: data3)).raw("<br/>")
+			markdown.raw("\(data3.count) |")
+			let data4 = try XCTAssertUnwrap(image.imageData(type: .jpeg, compression: 0.0))
+			try markdown.image(try WCGImage(data: data4)).raw("<br/>")
+			markdown.raw("\(data4.count) |")
 
-		XCTAssertGreaterThan(data1.count, data2.count)
-		XCTAssertGreaterThan(data2.count, data3.count)
-		XCTAssertGreaterThan(data3.count, data4.count)
+			XCTAssertGreaterThan(data1.count, data2.count)
+			XCTAssertGreaterThan(data2.count, data3.count)
+			XCTAssertGreaterThan(data3.count, data4.count)
 
-		markdown.br()
+			markdown.br()
+		}
 	}
 
 	func testGetGPSCoordinates1() throws {
@@ -308,6 +327,7 @@ final class DSFImageSourceTests: XCTestCase {
 		XCTAssertNotNil(imageSource.location)
 	}
 
+	#if !os(watchOS)
 	func testHEIC() throws {
 		let imgURL = bundleResourceURL(forResource: "gps-image", withExtension: "jpg")
 		let imageSource = try XCTAssertUnwrap(DSFImageSource(fileURL: imgURL))
@@ -323,6 +343,7 @@ final class DSFImageSourceTests: XCTestCase {
 			Swift.print(f.fileURL)
 		}
 	}
+	#endif
 
 	func testDPI() throws {
 		try markdown.h1("DPI") { markdown in
@@ -394,6 +415,32 @@ final class DSFImageSourceTests: XCTestCase {
 			let imageSource = try XCTAssertUnwrap(DSFImageSource(image: image))
 			XCTAssertEqual(10, imageSource.count)
 			XCTAssertEqual(origSource.count, imageSource.count)
+		}
+
+		do {
+			// Try a 72dpi image
+			let image = try NSImage.CreateARGB32(dimension: 80) { ctx, size in
+				let r = NSRect(origin: .zero, size: size).insetBy(dx: 10, dy: 10)
+				let p = NSBezierPath(roundedRect: r, xRadius: 12, yRadius: 12)
+				NSColor.systemBlue.setFill()
+				p.fill()
+			}
+			XCTAssertEqual(NSSize(width: 80, height: 80), image.size)
+		}
+
+		do {
+			// Try an 144dpi image
+			let image = try NSImage.CreateARGB32(dimension: 80, dpi: 144) { ctx, size in
+				let r = NSRect(origin: .zero, size: size).insetBy(dx: 10, dy: 10)
+				let p = NSBezierPath(roundedRect: r, xRadius: 12, yRadius: 12)
+
+				NSColor.systemBlue.setFill()
+				p.fill()
+			}
+			XCTAssertEqual(NSSize(width: 80, height: 80), image.size)
+			XCTAssertEqual(1, image.representations.count)
+			XCTAssertEqual(160, image.representations[0].pixelsHigh)
+			XCTAssertEqual(160, image.representations[0].pixelsWide)
 		}
 	}
 	#endif

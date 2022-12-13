@@ -1,5 +1,6 @@
 //
 //  DSFImageSource+Convert.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -25,6 +26,7 @@
 #if os(macOS)
 
 import AppKit
+import CoreGraphics
 import Foundation
 
 internal extension DSFImageSource {

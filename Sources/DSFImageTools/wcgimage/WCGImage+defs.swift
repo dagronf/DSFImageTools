@@ -1,5 +1,6 @@
 //
-//  WCGImage+private.swift
+//  DSFImageTools+Defs.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -22,29 +23,38 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-import CoreGraphics
 import Foundation
 
-#if os(macOS)
-import AppKit
-#else
-import UIKit
-#endif
-
-// MARK: - Color conveniences
-
-internal extension WCGImage {
-	class Color { }
+/// Errors thrown by this library
+public enum DSFImageToolsErrorType: Error {
+	case invalidImage
+	case cannotCreateImage
+	case unableToCopy
+	case invalidContext
+	case unableToCreateImageFromContext
+	case invalidCompression
+	case cannotCreateDestination
+	case unableToMask
+	case invalidColorspace
+	case invalidParameters
 }
 
-internal extension WCGImage.Color {
-#if os(macOS)
-	static let clear: CGColor = .clear
-	static let black: CGColor = .black
-	static let white: CGColor = .white
-#else
-	static let clear = UIColor.clear.cgColor
-	static let black = UIColor.black.cgColor
-	static let white = UIColor.white.cgColor
-#endif
+/// The type of scaling to apply to an image
+@objc public enum WCGImageScalingType: Int {
+	/// Scale the X and Y axes independently when resizing the image
+	case axesIndependent = 0
+	/// Scale the X and Y axes equally so that the entire image fills the specified size
+	case aspectFill = 1
+	/// Sclae the X and Y axes equally so that the entire image fits within the specified size
+	case aspectFit = 2
+}
+
+/// The type of flipping to apply to an image
+@objc public enum WCGImageFlipType: Int {
+	/// Flip horizontally
+	case horizontally = 0
+	/// Flip vertically
+	case vertically = 1
+	/// Flip across both axes
+	case both = 2
 }

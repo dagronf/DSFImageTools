@@ -1,5 +1,6 @@
 //
 //  DSFImageSource+GPS.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -22,6 +23,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+import CoreGraphics
 import CoreLocation
 import Foundation
 

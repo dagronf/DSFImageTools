@@ -1,5 +1,6 @@
 //
 //  DSFImageSource.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -148,7 +149,7 @@ public extension DSFImageSource {
 	/// - Parameters:
 	///   - images: The images to include in the source
 	///   - type: The type of the created image source
-	@objc convenience init?(images: [CGImage], utiType: String) {
+	convenience init?(images: [CGImage], utiType: String) {
 		guard
 			let mutableData = CFDataCreateMutable(nil, 0),
 			let destination = CGImageDestinationCreateWithData(mutableData, utiType as CFString, images.count, nil)

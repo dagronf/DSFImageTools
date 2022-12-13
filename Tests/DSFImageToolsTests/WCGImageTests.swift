@@ -8,6 +8,20 @@ private let markdown = MarkdownGenerator()
 final class WCGImageTests: XCTestCase {
 	override class func setUp() {
 		super.setUp()
+
+		let name: String = {
+#if os(macOS)
+			getMacModel()!
+#elseif os(watchOS)
+			"watchOS"
+#elseif os(tvOS)
+			"tvOS"
+#else
+			UIDevice.current.localizedModel
+#endif
+		}()
+
+		markdown.h1("Generated on '\(name)'")
 	}
 
 	override class func tearDown() {
@@ -24,14 +38,14 @@ final class WCGImageTests: XCTestCase {
 		markdown.raw("|----|----|----|\n")
 		markdown.raw("|")
 
-		let orig1 = try WCGImage(dimension: 300).border(WCGImage.Color.black)
+		let orig1 = try WCGImage(dimension: 300).border(WCGColor.black)
 		try markdown.image(orig1, linked: true)
 
 		markdown.raw(" | ")
 		let orig2 = try WCGImage(
 			dimension: 300,
 			backgroundColor: CGColor(srgbRed: 0.1, green: 0.9, blue: 0.3, alpha: 0.3)
-		).border(WCGImage.Color.black)
+		).border(WCGColor.black)
 		try markdown.image(orig2, linked: true)
 
 		markdown.raw(" | ")
@@ -40,13 +54,13 @@ final class WCGImageTests: XCTestCase {
 			dimension: 300,
 			backgroundColor: CGColor(srgbRed: 0.1, green: 0.9, blue: 0.3, alpha: 0.3)
 		) { ctx, size in
-			ctx.setFillColor(WCGImage.Color.white)
+			ctx.setFillColor(WCGColor.white)
 			ctx.addPath(CGPath(ellipseIn: CGRect(x: 30, y: 30, width: 100, height: 100), transform: nil))
 			ctx.fillPath()
-			ctx.setFillColor(WCGImage.Color.black)
+			ctx.setFillColor(WCGColor.black)
 			ctx.addPath(CGPath(rect: CGRect(x: 90, y: 90, width: 100, height: 100), transform: nil))
 			ctx.fillPath()
-		}.border(WCGImage.Color.black)
+		}.border(WCGColor.black)
 		try markdown.image(orig3, linked: true)
 
 		markdown.raw(" |").br()
@@ -62,11 +76,11 @@ final class WCGImageTests: XCTestCase {
 			markdown.raw("|----|----|----|\n")
 			markdown.raw("| ")
 
-			let testImage = try loadImage(name: "wilsonsprom", extn: "jpeg").border(WCGImage.Color.black)
+			let testImage = try loadImage(name: "wilsonsprom", extn: "jpeg").border(WCGColor.black)
 			try markdown.image(testImage, linked: true).raw(" | ")
-			let gray = try testImage.grayscale().border(WCGImage.Color.black)
+			let gray = try testImage.grayscale().border(WCGColor.black)
 			try markdown.image(gray, linked: true).raw(" | ")
-			let tint = try testImage.tinting(with: CGColor(srgbRed: 0.4, green: 0, blue: 0.4, alpha: 1)).border(WCGImage.Color.black)
+			let tint = try testImage.tinting(with: CGColor(srgbRed: 0.4, green: 0, blue: 0.4, alpha: 1)).border(WCGColor.black)
 			try markdown.image(tint, linked: true).raw(" | ")
 			markdown.br()
 		}
@@ -77,11 +91,11 @@ final class WCGImageTests: XCTestCase {
 			markdown.raw("|----|----|----|\n")
 			markdown.raw("| ")
 
-			let testImageAlpha = try loadImage(name: "apple-logo-dark", extn: "png").border(WCGImage.Color.black)
+			let testImageAlpha = try loadImage(name: "apple-logo-dark", extn: "png").border(WCGColor.black)
 			try markdown.image(testImageAlpha, linked: true).raw(" | ")
-			let gray = try testImageAlpha.grayscale(keepingAlpha: false).border(WCGImage.Color.black)
+			let gray = try testImageAlpha.grayscale(keepingAlpha: false).border(WCGColor.black)
 			try markdown.image(gray, linked: true).raw(" | ")
-			let tint = try testImageAlpha.tinting(with: CGColor(srgbRed: 0.4, green: 0, blue: 0.4, alpha: 1), keepingAlpha: false).border(WCGImage.Color.black)
+			let tint = try testImageAlpha.tinting(with: CGColor(srgbRed: 0.4, green: 0, blue: 0.4, alpha: 1), keepingAlpha: false).border(WCGColor.black)
 			try markdown.image(tint, linked: true).raw(" | ")
 			markdown.br()
 		}
@@ -92,11 +106,11 @@ final class WCGImageTests: XCTestCase {
 			markdown.raw("|----|----|----|\n")
 			markdown.raw("| ")
 
-			let testImageAlpha = try loadImage(name: "apple-logo-dark", extn: "png").border(WCGImage.Color.black)
+			let testImageAlpha = try loadImage(name: "apple-logo-dark", extn: "png").border(WCGColor.black)
 			try markdown.image(testImageAlpha, linked: true).raw(" | ")
-			let gray = try testImageAlpha.grayscale(keepingAlpha: true).border(WCGImage.Color.black)
+			let gray = try testImageAlpha.grayscale(keepingAlpha: true).border(WCGColor.black)
 			try markdown.image(gray, linked: true).raw(" | ")
-			let tint = try testImageAlpha.tinting(with: CGColor(srgbRed: 0.4, green: 0, blue: 0.4, alpha: 1), keepingAlpha: true).border(WCGImage.Color.black)
+			let tint = try testImageAlpha.tinting(with: CGColor(srgbRed: 0.4, green: 0, blue: 0.4, alpha: 1), keepingAlpha: true).border(WCGColor.black)
 			try markdown.image(tint, linked: true).raw(" | ")
 			markdown.br()
 		}
@@ -121,11 +135,11 @@ final class WCGImageTests: XCTestCase {
 			markdown.raw("|----|----|----|\n")
 			markdown.raw("| ")
 
-			let s1 = try testImage.scaling(scalingType: .axesIndependent, to: CGSize(width: 300, height: 300)).border(WCGImage.Color.black)
+			let s1 = try testImage.scaling(scalingType: .axesIndependent, to: CGSize(width: 300, height: 300)).border(WCGColor.black)
 			try markdown.image(s1, linked: true).raw(" | ")
-			let s2 = try testImage.scaling(scalingType: .aspectFit, to: CGSize(width: 300, height: 300)).border(WCGImage.Color.black)
+			let s2 = try testImage.scaling(scalingType: .aspectFit, to: CGSize(width: 300, height: 300)).border(WCGColor.black)
 			try markdown.image(s2, linked: true).raw(" | ")
-			let s3 = try testImage.scaling(scalingType: .aspectFill, to: CGSize(width: 300, height: 300)).border(WCGImage.Color.black)
+			let s3 = try testImage.scaling(scalingType: .aspectFill, to: CGSize(width: 300, height: 300)).border(WCGColor.black)
 			try markdown.image(s3, linked: true).raw(" | ")
 			markdown.br()
 		}
@@ -137,11 +151,11 @@ final class WCGImageTests: XCTestCase {
 			markdown.raw("|----|----|----|\n")
 			markdown.raw("| ")
 
-			let e1 = try testImageAlpha.scaling(scalingType: .axesIndependent, to: CGSize(width: 300, height: 300)).border(WCGImage.Color.black)
+			let e1 = try testImageAlpha.scaling(scalingType: .axesIndependent, to: CGSize(width: 300, height: 300)).border(WCGColor.black)
 			try markdown.image(e1, linked: true).raw(" | ")
-			let e2 = try testImageAlpha.scaling(scalingType: .aspectFit, to: CGSize(width: 300, height: 300)).border(WCGImage.Color.black)
+			let e2 = try testImageAlpha.scaling(scalingType: .aspectFit, to: CGSize(width: 300, height: 300)).border(WCGColor.black)
 			try markdown.image(e2, linked: true).raw(" | ")
-			let e3 = try testImageAlpha.scaling(scalingType: .aspectFill, to: CGSize(width: 300, height: 300)).border(WCGImage.Color.black)
+			let e3 = try testImageAlpha.scaling(scalingType: .aspectFill, to: CGSize(width: 300, height: 300)).border(WCGColor.black)
 			try markdown.image(e3, linked: true).raw(" | ")
 			markdown.br()
 		}
@@ -159,11 +173,11 @@ final class WCGImageTests: XCTestCase {
 			markdown.raw("|----|----|----|\n")
 			markdown.raw("| ")
 
-			let s1 = try testImage.rotating(by: 0.8).border(WCGImage.Color.black)
+			let s1 = try testImage.rotating(by: 0.8).border(WCGColor.black)
 			try markdown.image(s1, linked: true).raw(" | ")
-			let s2 = try testImage.rotating(by: 1.8).border(WCGImage.Color.black)
+			let s2 = try testImage.rotating(by: 1.8).border(WCGColor.black)
 			try markdown.image(s2, linked: true).raw(" | ")
-			let s3 = try testImage.rotating(by: 2.8).border(WCGImage.Color.black)
+			let s3 = try testImage.rotating(by: 2.8).border(WCGColor.black)
 			try markdown.image(s3, linked: true).raw(" | ").br()
 		}
 
@@ -173,11 +187,11 @@ final class WCGImageTests: XCTestCase {
 			markdown.raw("|----|----|----|\n")
 			markdown.raw("| ")
 
-			let e1 = try testImageAlpha.rotating(by: 0.8).border(WCGImage.Color.black)
+			let e1 = try testImageAlpha.rotating(by: 0.8).border(WCGColor.black)
 			try markdown.image(e1, linked: true).raw(" | ")
-			let e2 = try testImageAlpha.rotating(by: 1.8).border(WCGImage.Color.black)
+			let e2 = try testImageAlpha.rotating(by: 1.8).border(WCGColor.black)
 			try markdown.image(e2, linked: true).raw(" | ")
-			let e3 = try testImageAlpha.rotating(by: 2.8).border(WCGImage.Color.black)
+			let e3 = try testImageAlpha.rotating(by: 2.8).border(WCGColor.black)
 			try markdown.image(e3, linked: true).raw(" | ")
 		}
 	}
@@ -190,21 +204,21 @@ final class WCGImageTests: XCTestCase {
 
 		do {
 			try markdown.h2("Original image without alpha").image(try testImage.cgImage()).br()
-			let s1 = try testImage.flipping(.horizontally).border(WCGImage.Color.black)
+			let s1 = try testImage.flipping(.horizontally).border(WCGColor.black)
 			try markdown.h3("horizontally").br().image(s1, linked: true).br()
-			let s2 = try testImage.flipping(.vertically).border(WCGImage.Color.black)
+			let s2 = try testImage.flipping(.vertically).border(WCGColor.black)
 			try markdown.h3("vertically").br().image(s2, linked: true).br()
-			let s3 = try testImage.flipping(.both).border(WCGImage.Color.black)
+			let s3 = try testImage.flipping(.both).border(WCGColor.black)
 			try markdown.h3("both").br().image(s3, linked: true).br()
 		}
 
 		do {
 			try markdown.h2("Original image with alpha").image(try testImageAlpha.cgImage()).br()
-			let e1 = try testImageAlpha.flipping(.horizontally).border(WCGImage.Color.black)
+			let e1 = try testImageAlpha.flipping(.horizontally).border(WCGColor.black)
 			try markdown.h3("horizontally").br().image(e1, linked: true).br()
-			let e2 = try testImageAlpha.flipping(.vertically).border(WCGImage.Color.black)
+			let e2 = try testImageAlpha.flipping(.vertically).border(WCGColor.black)
 			try markdown.h3("vertically").br().image(e2, linked: true).br()
-			let e3 = try testImageAlpha.flipping(.both).border(WCGImage.Color.black)
+			let e3 = try testImageAlpha.flipping(.both).border(WCGColor.black)
 			try markdown.h3("both").br().image(e3, linked: true).br()
 		}
 	}
@@ -264,6 +278,7 @@ final class WCGImageTests: XCTestCase {
 
 		let testImage = try loadImage(name: "colorful-skull", extn: "jpg") //.scaling(by: 0.5)
 
+		#if canImport(CoreImage)
 		do {
 			markdown.raw("| Original | ⬆︎ Saturation | ⬆︎ Contrast | ⬆︎ Brightness |\n")
 			markdown.raw("|----|----|----|----|\n")
@@ -297,6 +312,7 @@ final class WCGImageTests: XCTestCase {
 			try markdown.image(bri, linked: true)
 			markdown.raw(" |\n").br()
 		}
+		#endif
 	}
 
 	func testClipping() throws {
@@ -332,62 +348,61 @@ final class WCGImageTests: XCTestCase {
 	}
 
 	func testColorspaceConversion() throws {
-		markdown.h1("Colorspace conversion")
+		try markdown.h1("Colorspace conversion") { markdown in
+			try markdown.h2("Image without alpha") { markdown in
+				let testImage = try self.loadImage(name: "wilsonsprom", extn: "jpeg")
+				let cmyk = try testImage.convertToCMYK()
+				markdown.raw("| Original | CMYK |\n")
+				markdown.raw("|------|------|\n")
+				markdown.raw("|")
+				try markdown.image(testImage, linked: true)
+				markdown.raw("| ")
+				try markdown.image(cmyk, linked: true)
+				markdown.raw(" | ").br()
+			}
 
-		do {
-			markdown.h2("Image without alpha")
-			let testImage = try loadImage(name: "wilsonsprom", extn: "jpeg")
-			let cmyk = try testImage.convertToCMYK()
-			markdown.raw("| Original | CMYK |\n")
-			markdown.raw("|------|------|\n")
-			markdown.raw("|")
-			try markdown.image(testImage, linked: true)
-			markdown.raw("| ")
-			try markdown.image(cmyk, linked: true)
-			markdown.raw(" | ").br()
-		}
+			try markdown.h2("Image with alpha") { markdown in
+				let testImageAlpha = try self.loadImage(name: "apple-logo-dark", extn: "png")
+				let cmyk = try testImageAlpha.convertToCMYK()
 
-		do {
-			markdown.h2("Image with alpha")
-			let testImageAlpha = try loadImage(name: "apple-logo-dark", extn: "png")
-			let cmyk = try testImageAlpha.convertToCMYK()
-
-			markdown.raw("| Original | CMYK |\n")
-			markdown.raw("|------|------|\n")
-			markdown.raw("|")
-			try markdown.image(testImageAlpha, linked: true)
-			markdown.raw("| ")
-			try markdown.image(cmyk, linked: true)
-			markdown.raw(" | ").br()
+				markdown.raw("| Original | CMYK |\n")
+				markdown.raw("|------|------|\n")
+				markdown.raw("|")
+				try markdown.image(testImageAlpha, linked: true)
+				markdown.raw("| ")
+				try markdown.image(cmyk, linked: true)
+				markdown.raw(" | ").br()
+			}
 		}
 	}
 
 	func testCMYKLoading() throws {
-		markdown.h2("CMYK")
-		let cmykImage = try loadImage(name: "cmyk", extn: "jpg")
-		// The loaded image will be cmyk
-		XCTAssertEqual(cmykImage.colorSpace?.model, CGColorSpaceModel.cmyk)
+		try markdown.h1("CMYK") { markdown in
+			let cmykImage = try self.loadImage(name: "cmyk", extn: "jpg")
+			// The loaded image will be cmyk
+			XCTAssertEqual(cmykImage.colorSpace?.model, CGColorSpaceModel.cmyk)
 
-		do {
-			// Check that we write out CMYK data for jpegs (png doesn't support)
-			let jpegCMYKData = try cmykImage.jpegData()
-			let reloadedCMYKImage = try WCGImage(data: jpegCMYKData)
-			XCTAssertEqual(reloadedCMYKImage.colorSpace?.model, CGColorSpaceModel.cmyk)
+			do {
+				// Check that we write out CMYK data for jpegs (png doesn't support)
+				let jpegCMYKData = try cmykImage.jpegData()
+				let reloadedCMYKImage = try WCGImage(data: jpegCMYKData)
+				XCTAssertEqual(reloadedCMYKImage.colorSpace?.model, CGColorSpaceModel.cmyk)
+			}
+
+			markdown.raw("| loaded (cmyk) | CMYK |\n")
+			markdown.raw("|------|------|\n")
+			markdown.raw("|")
+
+			try markdown.image(cmykImage, width: 250, linked: true)
+			markdown.raw("|")
+
+			// The new image should be sRGB (operations always end up with an sRGB image)
+			let s1 = try cmykImage.scaling(by: 0.5)
+			XCTAssertEqual(s1.colorSpace?.model, CGColorSpaceModel.rgb)
+			try markdown.image(s1)
+			markdown.raw("|")
+			markdown.br()
 		}
-
-		markdown.raw("| loaded (cmyk) | CMYK |\n")
-		markdown.raw("|------|------|\n")
-		markdown.raw("|")
-
-		try markdown.image(cmykImage, width: 250, linked: true)
-		markdown.raw("|")
-
-		// The new image should be sRGB (operations always end up with an sRGB image)
-		let s1 = try cmykImage.scaling(by: 0.5)
-		XCTAssertEqual(s1.colorSpace?.model, CGColorSpaceModel.rgb)
-		try markdown.image(s1)
-		markdown.raw("|")
-		markdown.br()
 	}
 
 	func testMasking() throws {

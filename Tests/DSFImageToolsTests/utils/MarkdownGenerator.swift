@@ -51,11 +51,7 @@ class MarkdownGenerator {
 		try file.write(to: destination, originalContentsURL: nil)
 	}
 
-//	@discardableResult func h1(_ text: String) -> MarkdownGenerator {
-//		content += "# \(text)\n\n"
-//		return self
-//	}
-
+	/// Add a header 1
 	@discardableResult func h1(_ text: String, _ block: ((MarkdownGenerator) throws -> Void)? = nil) rethrows -> MarkdownGenerator {
 		content += "# \(text)\n\n"
 		if let _ = block { try block?(self) }
@@ -63,11 +59,7 @@ class MarkdownGenerator {
 		return self
 	}
 
-//	@discardableResult func h2(_ text: String) -> MarkdownGenerator {
-//		content += "## \(text)\n\n"
-//		return self
-//	}
-
+	/// Add a header 2
 	@discardableResult func h2(_ text: String, _ block: ((MarkdownGenerator) throws -> Void)? = nil) rethrows -> MarkdownGenerator {
 		content += "## \(text)\n\n"
 		if let _ = block { try block?(self) }
@@ -75,31 +67,82 @@ class MarkdownGenerator {
 		return self
 	}
 
-	@discardableResult func h3(_ text: String) -> MarkdownGenerator {
+	/// Add a header 3
+	@discardableResult func h3(_ text: String, _ block: ((MarkdownGenerator) throws -> Void)? = nil) rethrows -> MarkdownGenerator {
 		content += "### \(text)\n\n"
+		if let _ = block { try block?(self) }
+		self.br()
 		return self
 	}
 
-	@discardableResult func h4(_ text: String) -> MarkdownGenerator {
-		content += "### \(text)\n\n"
+	/// Add a header 4
+	@discardableResult func h4(_ text: String, _ block: ((MarkdownGenerator) throws -> Void)? = nil) rethrows -> MarkdownGenerator {
+		content += "#### \(text)\n\n"
+		if let _ = block { try block?(self) }
+		self.br()
 		return self
 	}
 
+	/// Add text content
 	@discardableResult func text(_ text: String) -> MarkdownGenerator {
 		content += "\(text)\n"
 		return self
 	}
 
+	/// Add raw text (doesn't attempt to interpret the text)
 	@discardableResult func raw(_ text: String) -> MarkdownGenerator {
 		content += text
 		return self
 	}
 
+	/// Add a line break
 	@discardableResult func br() -> MarkdownGenerator {
 		content += "\n\n"
 		return self
 	}
 
+	/// Add a bullet list
+	@discardableResult func bulleted(_ rawBulletStrings: [String]) -> MarkdownGenerator {
+		content += "\n"
+
+		content += rawBulletStrings.reduce("") { partialResult, content in
+			partialResult + "* \(content)\n"
+		}
+
+		content += "\n"
+		return self
+	}
+
+	/// Add an image to the markdown
+	@discardableResult func image(_ image: CGImage, width: CGFloat? = nil, height: CGFloat? = nil, linked: Bool = true) throws -> MarkdownGenerator {
+		let identifier = "\(UUID().uuidString).png"
+
+		let data = try WCGImageStatic.pngData(image: image, compression: 0.7)
+		images.append((identifier, data))
+
+		if linked {
+			content += "<a href=\"./images/\(identifier)\">"
+		}
+
+		do {
+			content += "<img src=\"./images/\(identifier)\"" // width=\"125\" />"
+			if let width = width {
+				content += " width=\"\(width)\""
+			}
+			if let height = height {
+				content += " height=\"\(height)\""
+			}
+			content += " /> "
+		}
+
+		if linked {
+			content += "</a> "
+		}
+
+		return self
+	}
+
+	/// Add an image with optional sizes and clickability
 	@discardableResult func imageData(_ data: Data, extn: String, width: CGFloat? = nil, height: CGFloat? = nil, linked: Bool = true) throws -> MarkdownGenerator {
 		let identifier = "\(UUID().uuidString).\(extn)"
 		images.append((identifier, data))
@@ -125,37 +168,9 @@ class MarkdownGenerator {
 
 		return self
 	}
-
-
-	@discardableResult func image(_ image: CGImage, width: CGFloat? = nil, height: CGFloat? = nil, linked: Bool = true) throws -> MarkdownGenerator {
-		let identifier = "\(UUID().uuidString).png"
-
-		let data = try WCGImage.pngData(image: image, compression: 0.7)
-		images.append((identifier, data))
-
-		if linked {
-			content += "<a href=\"./images/\(identifier)\">"
-		}
-
-		do {
-			content += "<img src=\"./images/\(identifier)\"" // width=\"125\" />"
-			if let width = width {
-				content += " width=\"\(width)\""
-			}
-			if let height = height {
-				content += " height=\"\(height)\""
-			}
-			content += " /> "
-		}
-
-		if linked {
-			content += "</a>"
-		}
-
-		return self
-	}
-
 }
+
+#if canImport(DSFImageTools)
 
 import DSFImageTools
 extension MarkdownGenerator {
@@ -173,3 +188,5 @@ extension MarkdownGenerator {
 		)
 	}
 }
+
+#endif

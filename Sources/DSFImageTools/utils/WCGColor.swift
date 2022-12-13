@@ -1,5 +1,5 @@
 //
-//  CGContext+extensions.swift
+//  WCGColor.swift
 //
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
@@ -23,29 +23,31 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-import Foundation
 import CoreGraphics
+import Foundation
 
-// MARK: - CGContext GState block
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
-extension CGContext {
-	/// Execute the supplied block within a `saveGState() / restoreGState()` pair, providing a context
-	/// to draw in during the execution of the block
-	///
-	/// - Parameter stateBlock: The block to execute within the new graphics state
-	/// - Parameter context: The context to draw into within the block
-	///
-	/// Example usage:
-	/// ```
-	///    context.usingGState { (ctx) in
-	///       ctx.addPath(unsetBackground)
-	///       ctx.setFillColor(bgc1.cgColor)
-	///       ctx.fillPath(using: .evenOdd)
-	///    }
-	/// ```
-	@inlinable func usingGState<ReturnType>(_ stateBlock: (_ context: CGContext) throws -> ReturnType) rethrows -> ReturnType {
-		self.saveGState()
-		defer { self.restoreGState() }
-		return try stateBlock(self)
-	}
+// MARK: - Color conveniences
+
+@objc public class WCGColor: NSObject {
+#if os(macOS)
+	/// Clear color
+	@objc public static let clear: CGColor = .clear
+	/// Black color
+	@objc public static let black: CGColor = .black
+	/// White color
+	@objc public static let white: CGColor = .white
+#else
+	/// Clear color
+	@objc public static let clear = UIColor.clear.cgColor
+	/// Black color
+	@objc public static let black = UIColor.black.cgColor
+	/// White color
+	@objc public static let white = UIColor.white.cgColor
+#endif
 }

@@ -1,5 +1,6 @@
 //
 //  DSFFileThumbnail.swift
+//
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
 //  MIT License
@@ -22,7 +23,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#if !os(tvOS)
+#if !os(tvOS) && !os(watchOS)
 
 import CoreGraphics
 import Foundation
