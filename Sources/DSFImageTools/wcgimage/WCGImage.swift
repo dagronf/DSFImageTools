@@ -138,7 +138,7 @@ public extension WCGImage {
 public extension WCGImage {
 	/// Returns a new image cropped to the specified rect
 	/// - Parameter rect: The rectangle to crop this image
-	/// - Returns: <#description#>
+	/// - Returns: A new image, cropped to the specified rect
 	@inlinable func cropping(to rect: CGRect) throws -> WCGImage {
 		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
 		return try WCGImage(image: WCGImageStatic.imageByCroppingImage(image, to: rect))
