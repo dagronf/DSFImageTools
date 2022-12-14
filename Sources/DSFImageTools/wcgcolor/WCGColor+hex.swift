@@ -37,23 +37,7 @@ public let WCGDefaultHexColorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
 
 // MARK: - Color conveniences
 
-@objc public class WCGColor: NSObject {
-#if os(macOS)
-	/// Clear color
-	@objc public static let clear: CGColor = .clear
-	/// Black color
-	@objc public static let black: CGColor = .black
-	/// White color
-	@objc public static let white: CGColor = .white
-#else
-	/// Clear color
-	@objc public static let clear = UIColor.clear.cgColor
-	/// Black color
-	@objc public static let black = UIColor.black.cgColor
-	/// White color
-	@objc public static let white = UIColor.white.cgColor
-#endif
-
+public extension WCGColor {
 	/// Create a CGColor color from a hex string
 	/// - Parameters:
 	///   - hexString: The hex string representing the color
@@ -71,7 +55,7 @@ public let WCGDefaultHexColorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
 	/// * [#]ffff (rgba)
 	/// * [#]ffffff (rgb, alpha = 1)
 	/// * [#]ffffffff (rgba)
-	@objc @inlinable public static func hex(
+	@objc @inlinable static func hex(
 		_ hexString: String,
 		usingColorSpace colorSpace: CGColorSpace = WCGDefaultHexColorSpace
 	) -> CGColor? {
@@ -97,7 +81,7 @@ extension CGColor {
 	/// * [#]ffff (rgba)
 	/// * [#]ffffff (rgb, alpha = 1)
 	/// * [#]ffffffff (rgba)
-	@inlinable public static func fromHexString(
+	public static func fromHexString(
 		_ hexString: String,
 		usingColorSpace colorSpace: CGColorSpace = WCGDefaultHexColorSpace
 	) -> CGColor? {
@@ -135,5 +119,61 @@ extension CGColor {
 		let alpha = Double((rgba & 0x0000_00FF) >> 0) / 255
 
 		return CGColor(colorSpace: colorSpace, components: [red, green, blue, alpha])
+	}
+
+	/// Returns a lowercased hex RGBA string representation of this color (eg "#ff6512C5")
+	public func toHexRRGGBBAA() -> String? {
+		guard
+			let converted = self.converted(to: WCGDefaultHexColorSpace, intent: .defaultIntent, options: nil),
+			let r = converted.components?[0],
+			let g = converted.components?[1],
+			let b = converted.components?[2],
+			let a = converted.components?[3]
+		else {
+			return nil
+		}
+
+		let cr = UInt8(r * 255).clamped(to: 0 ... 255)
+		let cg = UInt8(g * 255).clamped(to: 0 ... 255)
+		let cb = UInt8(b * 255).clamped(to: 0 ... 255)
+		let ca = UInt8(a * 255).clamped(to: 0 ... 255)
+
+		return String(format: "#%02x%02x%02x%02x", cr, cg, cb, ca)
+	}
+
+	/// Returns a lowercased hex RGB (no alpha) string representation of this color (eg "#ff6512")
+	public func toHexRRGGBB() -> String? {
+		guard
+			let converted = self.converted(to: WCGDefaultHexColorSpace, intent: .defaultIntent, options: nil),
+			let r = converted.components?[0],
+			let g = converted.components?[1],
+			let b = converted.components?[2]
+		else {
+			return nil
+		}
+
+		let cr = UInt8(r * 255).clamped(to: 0 ... 255)
+		let cg = UInt8(g * 255).clamped(to: 0 ... 255)
+		let cb = UInt8(b * 255).clamped(to: 0 ... 255)
+
+		return String(format: "#%02x%02x%02x", cr, cg, cb)
+	}
+
+	/// Returns a lowercased hex RGB (no alpha) string representation of this color (eg "#ff6512")
+	public func toHexRGB() -> String? {
+		guard
+			let converted = self.converted(to: WCGDefaultHexColorSpace, intent: .defaultIntent, options: nil),
+			let r = converted.components?[0],
+			let g = converted.components?[1],
+			let b = converted.components?[2]
+		else {
+			return nil
+		}
+
+		let cr = UInt8(r * 15).clamped(to: 0 ... 15)
+		let cg = UInt8(g * 15).clamped(to: 0 ... 15)
+		let cb = UInt8(b * 15).clamped(to: 0 ... 15)
+
+		return String(format: "#%1x%1x%1x", cr, cg, cb)
 	}
 }
