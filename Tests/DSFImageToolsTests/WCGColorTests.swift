@@ -77,4 +77,31 @@ final class WCGColorTests: XCTestCase {
 		let rgb = c4.toHexRGB()
 		XCTAssertEqual("#752", rgb)
 	}
+
+	func testContrastingColor() throws {
+
+		let c0 = WCGColor.hex("#000")!
+		let t0 = c0.contrastingTextColor()
+		XCTAssertEqual(t0, WCGColor.white)
+
+		let c00 = WCGColor.hex("#fff")!
+		let t00 = c00.contrastingTextColor()
+		XCTAssertEqual(t00, WCGColor.black)
+
+		let c1 = WCGColor.hex("#f00")!
+		let t1 = c1.contrastingTextColor()
+		XCTAssertEqual(t1, WCGColor.black)
+
+		let c2 = WCGColor.hex("#00f")!
+		let t2 = c2.contrastingTextColor()
+		XCTAssertEqual(t2, WCGColor.white)
+
+		let c3 = WCGColor.hex("#0f0")!
+		let t3 = c3.contrastingTextColor()
+		XCTAssertEqual(t3, WCGColor.black)
+
+		let c4 = WCGColor.hex("#080")!
+		let t4 = c4.contrastingTextColor()
+		XCTAssertEqual(t4, WCGColor.white)
+	}
 }

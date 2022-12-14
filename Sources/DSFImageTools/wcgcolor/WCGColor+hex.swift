@@ -26,12 +26,6 @@
 import CoreGraphics
 import Foundation
 
-#if os(macOS)
-import AppKit
-#else
-import UIKit
-#endif
-
 // The default colorspace for hex (standard RGB)
 public let WCGDefaultHexColorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
 

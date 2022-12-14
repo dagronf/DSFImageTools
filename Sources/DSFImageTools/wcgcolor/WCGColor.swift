@@ -55,3 +55,4 @@ import UIKit
 	@objc public static let gray = UIColor.gray.cgColor
 #endif
 }
+
