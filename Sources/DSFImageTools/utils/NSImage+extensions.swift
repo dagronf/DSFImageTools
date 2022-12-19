@@ -30,6 +30,17 @@
 import Foundation
 import AppKit
 
+// MARK: - Constructions
+
+extension NSImage {
+	/// Create an NSImage from a ciImage
+	@objc convenience init(ciImage: CIImage) {
+		let rep = NSCIImageRep(ciImage: ciImage)
+		self.init(size: rep.size)
+		self.addRepresentation(rep)
+	}
+}
+
 // MARK: - CoreGraphics conveniences
 
 extension NSImage {
