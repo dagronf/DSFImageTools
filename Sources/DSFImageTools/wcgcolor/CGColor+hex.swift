@@ -1,5 +1,5 @@
 //
-//  WCGColor.swift
+//  CGColor+hex.swift
 //
 //  Copyright © 2022 Darren Ford. All rights reserved.
 //
@@ -26,36 +26,10 @@
 import CoreGraphics
 import Foundation
 
+// Hex utilities for CGColor
+
 // The default colorspace for hex (standard RGB)
 public let WCGDefaultHexColorSpace = CGColorSpace(name: CGColorSpace.sRGB)!
-
-// MARK: - Color conveniences
-
-public extension WCGColor {
-	/// Create a CGColor color from a hex string
-	/// - Parameters:
-	///   - hexString: The hex string representing the color
-	///   - colorSpace: The colorspace to use (expecting RGBA). Defaults to sRGB.
-	/// - Returns: The color, or nil if the color couldn't be created
-	///
-	/// Usage:
-	///
-	/// ```swift
-	///   let color = WCGColor.hex("#A1B2C3FF")
-	/// ```
-	///
-	/// Supported formats:
-	/// * [#]fff (rgb, alpha = 1)
-	/// * [#]ffff (rgba)
-	/// * [#]ffffff (rgb, alpha = 1)
-	/// * [#]ffffffff (rgba)
-	@objc @inlinable static func hex(
-		_ hexString: String,
-		usingColorSpace colorSpace: CGColorSpace = WCGDefaultHexColorSpace
-	) -> CGColor? {
-		CGColor.fromHexString(hexString, usingColorSpace: colorSpace)
-	}
-}
 
 extension CGColor {
 	/// Create a CGColor color from a hex string
@@ -116,7 +90,7 @@ extension CGColor {
 	}
 
 	/// Returns a lowercased hex RGBA string representation of this color (eg "#ff6512C5")
-	public func toHexRRGGBBAA() -> String? {
+	public var hexRGBA256: String? {
 		guard
 			let converted = self.converted(to: WCGDefaultHexColorSpace, intent: .defaultIntent, options: nil),
 			let r = converted.components?[0],
@@ -136,7 +110,7 @@ extension CGColor {
 	}
 
 	/// Returns a lowercased hex RGB (no alpha) string representation of this color (eg "#ff6512")
-	public func toHexRRGGBB() -> String? {
+	public var hexRGB256: String? {
 		guard
 			let converted = self.converted(to: WCGDefaultHexColorSpace, intent: .defaultIntent, options: nil),
 			let r = converted.components?[0],
@@ -153,8 +127,8 @@ extension CGColor {
 		return String(format: "#%02x%02x%02x", cr, cg, cb)
 	}
 
-	/// Returns a lowercased hex RGB (no alpha) string representation of this color (eg "#ff6512")
-	public func toHexRGB() -> String? {
+	/// Returns a lowercased hex RGB (no alpha) string representation of this color (eg "#f61")
+	public var hexRGB16: String? {
 		guard
 			let converted = self.converted(to: WCGDefaultHexColorSpace, intent: .defaultIntent, options: nil),
 			let r = converted.components?[0],

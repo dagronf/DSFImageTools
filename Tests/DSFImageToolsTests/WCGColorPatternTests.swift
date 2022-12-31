@@ -89,7 +89,7 @@ final class WCGColorPatternTests: XCTestCase {
 
 			holder = maskPattern
 
-			let maskColor = WCGColor.hex("#0ff")!
+			let maskColor = CGColor.fromHexString("#0ff")!
 			let patternColor = maskPattern.cgColor(maskColor: maskColor)
 			let image = try WCGImage(dimension: 420, backgroundColor: patternColor)
 
@@ -167,14 +167,14 @@ final class WCGColorPatternTests: XCTestCase {
 			}
 			)
 
-			let maskColor = WCGColor.hex("#0ff")!
+			let maskColor = CGColor.fromHexString("#0ff")!
 			let patternColor = maskPattern.cgColor(maskColor: maskColor)
 
 			let im = try WCGImage(dimension: 200, backgroundColor: patternColor)
 			try markdown.image(im, linked: true)
 			markdown.raw("|")
 
-			let maskColor2 = WCGColor.hex("#f48")!
+			let maskColor2 = CGColor.fromHexString("#f48")!
 			let patternColor2 = maskPattern.cgColor(maskColor: maskColor2)
 			let im2 = try WCGImage(dimension: 200, backgroundColor: patternColor2)
 			try markdown.image(im2, linked: true)

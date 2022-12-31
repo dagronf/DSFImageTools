@@ -366,8 +366,8 @@ public extension WCGImage {
 	/// - Returns: A new image
 	@inlinable func fillStroke(stroke: String, lineWidth: CGFloat = 1, fill: String, path: CGPath) throws -> WCGImage {
 		guard
-			let s = WCGColor.hex(stroke),
-			let f = WCGColor.hex(fill)
+			let s = CGColor.fromHexString(stroke),
+			let f = CGColor.fromHexString(fill)
 		else {
 			throw DSFImageToolsErrorType.invalidHexColor
 		}

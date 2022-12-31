@@ -797,6 +797,30 @@ public extension WCGImageStatic {
 		}
 		return cgImage
 	}
+
+	/// Returns an RGBA array representation of an image
+	/// - Parameter image: The image
+	/// - Returns: The RGBA array
+	@objc static func imageByConvertingToRGBAArray(_ image: CGImage) -> [UInt8] {
+		let width = image.width
+		let height = image.height
+		var bytes = [UInt8](repeating: 0, count: width * height * 4)
+		bytes.withUnsafeMutableBytes { ptr in
+			if let context = CGContext(
+				data: ptr.baseAddress,
+				width: width,
+				height: height,
+				bitsPerComponent: 8,
+				bytesPerRow: 4 * width,
+				space: CGColorSpaceCreateDeviceRGB(),
+				bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+			) {
+				let rect = CGRect(x: 0, y: 0, width: width, height: height)
+				context.draw(image, in: rect)
+			}
+		}
+		return bytes
+	}
 }
 
 #if canImport(CoreImage)
