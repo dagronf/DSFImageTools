@@ -25,37 +25,52 @@
 //
 
 import Foundation
+import SwiftImageReadWrite
 
 // MARK: [Exporting]
 
 public extension WCGImage {
 	/// Generate a JPEG representation
 	/// - Parameters:
+	///   - scale: The scale to apply to the image (eg scale == 2 -> dpi == 144.0)
 	///   - compression: The compression level to use
 	///   - excludeGPSData: If true, removes any GPS data in the resulting data
 	/// - Returns: The JPEG data
-	@inlinable func jpegData(compression: Double = .infinity, excludeGPSData: Bool = false) throws -> Data {
+	@inlinable func jpegData(scale: CGFloat = 1.0, compression: CGFloat? = nil, excludeGPSData: Bool = false) throws -> Data {
 		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
-		return try WCGImageStatic.jpegData(image: image, compression: compression, excludeGPSData: excludeGPSData)
+		return try image.representation.jpeg(scale: scale, compression: compression, excludeGPSData: excludeGPSData)
 	}
 
 	/// Generate a PNG representation
 	/// - Parameters:
+	///   - scale: The scale to apply to the image (eg scale == 2 -> dpi == 144.0)
 	///   - compression: The compression level to use
 	///   - excludeGPSData: If true, removes any GPS data in the resulting data
 	/// - Returns: The PNG data
-	@inlinable func pngData(compression: Double = .infinity, excludeGPSData: Bool = false) throws -> Data {
+	@inlinable func pngData(scale: CGFloat = 1.0, compression: CGFloat? = nil, excludeGPSData: Bool = false) throws -> Data {
 		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
-		return try WCGImageStatic.pngData(image: image, compression: compression, excludeGPSData: excludeGPSData)
+		return try image.representation.png(scale: scale, excludeGPSData: excludeGPSData)
 	}
 
 	/// Generate a TIFF representation
 	/// - Parameters:
+	///   - scale: The scale to apply to the image (eg scale == 2 -> dpi == 144.0)
 	///   - compression: The compression level to use
 	///   - excludeGPSData: If true, removes any GPS data in the resulting data
 	/// - Returns: The TIFF data
-	@inlinable func tiffData(compression: Double = .infinity, excludeGPSData: Bool = false) throws -> Data {
+	@inlinable func tiffData(scale: CGFloat = 1.0, compression: CGFloat? = nil, excludeGPSData: Bool = false) throws -> Data {
 		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
-		return try WCGImageStatic.tiffData(image: image, compression: compression, excludeGPSData: excludeGPSData)
+		return try image.representation.tiff(scale: scale, compression: compression, excludeGPSData: excludeGPSData)
+	}
+
+	/// Generate a HEIC representation
+	/// - Parameters:
+	///   - scale: The scale to apply to the image (eg scale == 2 -> dpi == 144.0)
+	///   - compression: The compression level to use
+	///   - excludeGPSData: If true, removes any GPS data in the resulting data
+	/// - Returns: The HEIC data
+	@inlinable func heicData(scale: CGFloat = 1.0, compression: CGFloat? = nil, excludeGPSData: Bool = false) throws -> Data {
+		guard let image = self._owned else { throw DSFImageToolsErrorType.invalidImage }
+		return try image.representation.heic(compression: compression, excludeGPSData: excludeGPSData)
 	}
 }

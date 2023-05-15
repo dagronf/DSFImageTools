@@ -27,6 +27,8 @@ import CoreGraphics
 import Foundation
 import ImageIO
 
+import SwiftImageReadWrite
+
 #if os(macOS)
 import AppKit
 #else
@@ -202,6 +204,7 @@ public extension DSFImageSource {
 			compression: CGFloat = .infinity,
 			options: [String: Any]? = nil
 		) -> Data? {
+
 			return self.imageData(
 				utiType: type.rawValue,
 				removeGPSData: removeGPSData,
@@ -212,22 +215,25 @@ public extension DSFImageSource {
 
 		/// Extract the data for the image
 		/// - Parameters:
-		///   - utiType: The
+		///   - utiType: The universal type identifier for the image
+		///   - scale: The scale (dpi) of the resulting image
 		///   - removeGPSData: If true, removes any GPS data that might exist in the image
 		///   - compression: The compression level to apply. If the utiType doesn't support compression it is ignored
 		///   - options: Other options as defined in [documentation](https://developer.apple.com/documentation/imageio/cgimagedestination/destination_properties)
 		/// - Returns: The data for the image
 		@objc public func imageData(
 			utiType: String,
+			scale: CGFloat = 1.0,
 			removeGPSData: Bool = false,
 			compression: CGFloat = .infinity,
 			options: [String: Any]? = nil
 		) -> Data? {
-			return self.image?.imageData(
-				utiType: utiType,
-				removeGPSData: removeGPSData,
+			try? self.image?.representation.rawImageData(
+				uniformTypeIdentifier: utiType,
+				scale: scale,
 				compression: compression,
-				options: options
+				excludeGPSData: removeGPSData,
+				otherOptions: options
 			)
 		}
 

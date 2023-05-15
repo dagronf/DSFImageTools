@@ -28,6 +28,7 @@
 import CoreGraphics
 import ImageIO
 import Foundation
+import SwiftImageReadWrite
 
 #if canImport(CoreImage)
 import CoreImage
@@ -118,84 +119,53 @@ public extension WCGImageStatic {
 
 // MARK: [Exporting]
 
-internal extension WCGImageStatic {
-	/// Returns a data representation of the image
-	/// - Parameters:
-	///   - image: The image
-	///   - uttype: The UTType of the resulting data (eg. "public.png")
-	///   - compression: The compression factor, or nil to use default
-	///   - excludeGPSData: If true, removes any GPS data from the resulting image data
-	/// - Returns: The data representation of the image, or nil if an error occurred.
-	@usableFromInline static func imageData(
-		image: CGImage,
-		uttype: CFString,
-		compression: Double? = nil,
-		excludeGPSData: Bool = false
-	) throws -> Data {
-		if let mutableData = CFDataCreateMutable(nil, 0),
-			let destination = CGImageDestinationCreateWithData(mutableData, uttype as CFString, 1, nil)
-		{
-			var options: [CFString: Any] = [:]
-			if let compression = compression {
-				guard (0.0 ... 1.0).contains(compression) else { throw DSFImageToolsErrorType.invalidCompression }
-				options[kCGImageDestinationLossyCompressionQuality] = compression
-			}
-			if excludeGPSData == true {
-				options[kCGImageMetadataShouldExcludeGPS] = true
-			}
-			CGImageDestinationAddImage(destination, image, options as CFDictionary)
-			CGImageDestinationFinalize(destination)
-			return mutableData as Data
-		}
-
-		throw DSFImageToolsErrorType.cannotCreateDestination
-	}
-}
-
 public extension WCGImageStatic {
 	/// Generate a JPEG representation for a CGImage
 	/// - Parameters:
 	///   - image: The image
+	///   - scale: The scale of the resulting image (eg. 2 == @2x)
 	///   - compression: The compression level
 	///   - excludeGPSData: If true, removes any GPS data in the resulting data
 	/// - Returns: The JPEG data
 	@objc @inlinable static func jpegData(
 		image: CGImage,
+		scale: CGFloat = 1.0,
 		compression: Double = .infinity,
 		excludeGPSData: Bool = false
 	) throws -> Data {
-		let compression = (compression == .infinity) ? nil : compression
-		return try Self.imageData(image: image, uttype: kUTTypeJPEG, compression: compression, excludeGPSData: excludeGPSData)
+		let compression: CGFloat? = (compression == .infinity) ? nil : compression
+		return try image.representation.jpeg(scale: scale, compression: compression, excludeGPSData: excludeGPSData)
 	}
 
 	/// Generate a PNG representation for a CGImage
 	/// - Parameters:
 	///   - image: The image
-	///   - compression: The compression level
+	///   - scale: The scale of the resulting image (eg. 2 == @2x)
 	///   - excludeGPSData: If true, removes any GPS data in the resulting data
 	/// - Returns: The PNG data
 	@objc @inlinable static func pngData(
 		image: CGImage,
-		compression: Double = .infinity,
+		scale: CGFloat = 1.0,
 		excludeGPSData: Bool = false
 	) throws -> Data {
-		let compression = (compression == .infinity) ? nil : compression
-		return try Self.imageData(image: image, uttype: kUTTypePNG, compression: compression, excludeGPSData: excludeGPSData)
+		return try image.representation.png(scale: scale, excludeGPSData: excludeGPSData)
 	}
 
 	/// Generate a TIFF representation for a CGImage
 	/// - Parameters:
 	///   - image: The image
+	///   - scale: The scale of the resulting image (eg. 2 == @2x)
 	///   - compression: The compression level
 	///   - excludeGPSData: If true, removes any GPS data in the resulting data
 	/// - Returns: The TIFF data
 	@objc @inlinable static func tiffData(
 		image: CGImage,
+		scale: CGFloat = 1.0,
 		compression: Double = .infinity,
 		excludeGPSData: Bool = false
 	) throws -> Data {
-		let compression = (compression == .infinity) ? nil : compression
-		return try Self.imageData(image: image, uttype: kUTTypeTIFF, compression: compression, excludeGPSData: excludeGPSData)
+		let compression: CGFloat? = (compression == .infinity) ? nil : compression
+		return try image.representation.tiff(scale: scale, compression: compression, excludeGPSData: excludeGPSData)
 	}
 }
 

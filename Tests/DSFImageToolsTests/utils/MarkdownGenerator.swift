@@ -117,7 +117,7 @@ class MarkdownGenerator {
 	@discardableResult func image(_ image: CGImage, width: CGFloat? = nil, height: CGFloat? = nil, linked: Bool = true) throws -> MarkdownGenerator {
 		let identifier = "\(UUID().uuidString).png"
 
-		let data = try WCGImageStatic.pngData(image: image, compression: 0.7)
+		let data = try WCGImageStatic.pngData(image: image)
 		images.append((identifier, data))
 
 		if linked {

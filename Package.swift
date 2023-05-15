@@ -12,11 +12,14 @@ let package = Package(
 			targets: ["DSFImageTools"]),
 	],
 	dependencies: [
+		.package(
+			url: "https://github.com/dagronf/SwiftImageReadWrite", .upToNextMinor(from: "1.1.3")
+		),
 	],
 	targets: [
 		.target(
 			name: "DSFImageTools",
-			dependencies: []),
+			dependencies: ["SwiftImageReadWrite"]),
 		.testTarget(
 			name: "DSFImageToolsTests",
 			dependencies: ["DSFImageTools"],

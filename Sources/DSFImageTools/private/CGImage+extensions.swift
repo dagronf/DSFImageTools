@@ -40,72 +40,72 @@ extension CGImage {
 	}
 }
 
-extension CGImage {
-	/// Extract the data for the image
-	/// - Parameters:
-	///   - type: The type of image to export
-	///   - removeGPSData: If true, removes any GPS data that might exist in the image
-	///   - compression: The compression level to apply. If the utiType doesn't support compression it is ignored
-	///   - options: Other options as defined in [documentation](https://developer.apple.com/documentation/imageio/cgimagedestination/destination_properties)
-	/// - Returns: The data for the image
-	func imageData(
-		type: DSFImageSourceType,
-		removeGPSData: Bool = false,
-		compression: CGFloat = .infinity,
-		options: [String: Any]? = nil
-	) -> Data? {
-		return self.imageData(
-			utiType: type.rawValue,
-			removeGPSData: removeGPSData,
-			compression: compression,
-			options: options
-		)
-	}
-	
-	/// Extract the data for the image
-	/// - Parameters:
-	///   - utiType: The uti for the image to export.
-	///   - removeGPSData: If true, removes any GPS data that might exist in the image
-	///   - compression: The compression level to apply. If the utiType doesn't support compression it is ignored
-	///   - options: Other options as defined in [documentation](https://developer.apple.com/documentation/imageio/cgimagedestination/destination_properties)
-	/// - Returns: The data for the image
-	func imageData(
-		utiType: String,
-		removeGPSData: Bool = false,
-		compression: CGFloat = .infinity,
-		options: [String: Any]? = nil
-	) -> Data? {
-		// Check that if compression is provided that it is within a valid range
-		if compression.isFinite, ___ValidCompressionRange.contains(compression) == false {
-			return nil
-		}
-		guard
-			let mutableData = CFDataCreateMutable(nil, 0),
-			let destination = CGImageDestinationCreateWithData(mutableData, utiType as CFString, 1, nil)
-		else {
-			return nil
-		}
-		
-		var props: [CFString: Any?] = [:]
-		if removeGPSData {
-			props[kCGImagePropertyGPSDictionary] = kCFNull
-		}
-		if compression.isFinite {
-			props[kCGImageDestinationLossyCompressionQuality] = NSNumber(value: compression) as CFNumber
-		}
-		
-		// Add in the user's customizations
-		options?.forEach { props[$0.0 as CFString] = $0.1 }
-		
-		CGImageDestinationAddImage(destination, self, props as CFDictionary)
-		
-		guard CGImageDestinationFinalize(destination) else {
-			return nil
-		}
-		
-		return mutableData as Data
-	}
-}
+//extension CGImage {
+//	/// Extract the data for the image
+//	/// - Parameters:
+//	///   - type: The type of image to export
+//	///   - removeGPSData: If true, removes any GPS data that might exist in the image
+//	///   - compression: The compression level to apply. If the utiType doesn't support compression it is ignored
+//	///   - options: Other options as defined in [documentation](https://developer.apple.com/documentation/imageio/cgimagedestination/destination_properties)
+//	/// - Returns: The data for the image
+//	func imageData(
+//		type: DSFImageSourceType,
+//		removeGPSData: Bool = false,
+//		compression: CGFloat = .infinity,
+//		options: [String: Any]? = nil
+//	) -> Data? {
+//		return self.imageData(
+//			utiType: type.rawValue,
+//			removeGPSData: removeGPSData,
+//			compression: compression,
+//			options: options
+//		)
+//	}
+//	
+//	/// Extract the data for the image
+//	/// - Parameters:
+//	///   - utiType: The uti for the image to export.
+//	///   - removeGPSData: If true, removes any GPS data that might exist in the image
+//	///   - compression: The compression level to apply. If the utiType doesn't support compression it is ignored
+//	///   - options: Other options as defined in [documentation](https://developer.apple.com/documentation/imageio/cgimagedestination/destination_properties)
+//	/// - Returns: The data for the image
+//	func imageData(
+//		utiType: String,
+//		removeGPSData: Bool = false,
+//		compression: CGFloat = .infinity,
+//		options: [String: Any]? = nil
+//	) -> Data? {
+//		// Check that if compression is provided that it is within a valid range
+//		if compression.isFinite, ___ValidCompressionRange.contains(compression) == false {
+//			return nil
+//		}
+//		guard
+//			let mutableData = CFDataCreateMutable(nil, 0),
+//			let destination = CGImageDestinationCreateWithData(mutableData, utiType as CFString, 1, nil)
+//		else {
+//			return nil
+//		}
+//		
+//		var props: [CFString: Any?] = [:]
+//		if removeGPSData {
+//			props[kCGImagePropertyGPSDictionary] = kCFNull
+//		}
+//		if compression.isFinite {
+//			props[kCGImageDestinationLossyCompressionQuality] = NSNumber(value: compression) as CFNumber
+//		}
+//		
+//		// Add in the user's customizations
+//		options?.forEach { props[$0.0 as CFString] = $0.1 }
+//		
+//		CGImageDestinationAddImage(destination, self, props as CFDictionary)
+//		
+//		guard CGImageDestinationFinalize(destination) else {
+//			return nil
+//		}
+//		
+//		return mutableData as Data
+//	}
+//}
 
 extension CGImage {
 	// Returns a new image with its orientation as 'up'
