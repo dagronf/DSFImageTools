@@ -1,5 +1,4 @@
 // swift-tools-version: 5.4
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
@@ -12,9 +11,7 @@ let package = Package(
 			targets: ["DSFImageTools"]),
 	],
 	dependencies: [
-		.package(
-			url: "https://github.com/dagronf/SwiftImageReadWrite", .upToNextMinor(from: "1.1.3")
-		),
+		.package(url: "https://github.com/dagronf/SwiftImageReadWrite", .from: "1.1.3"),
 	],
 	targets: [
 		.target(
