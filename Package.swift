@@ -11,7 +11,7 @@ let package = Package(
 			targets: ["DSFImageTools"]),
 	],
 	dependencies: [
-		.package(url: "https://github.com/dagronf/SwiftImageReadWrite", .from: "1.1.3"),
+		.package(url: "https://github.com/dagronf/SwiftImageReadWrite", from: "1.1.3"),
 	],
 	targets: [
 		.target(
